@@ -6,6 +6,21 @@ namespace FormulaEvaluator
     {
         public delegate int Lookup(String variable_name);
 
+        /// <summary>
+        /// This method will pass a string of formula like "9*9" or "(3-0)*6/2" and a function to
+        /// change a string(variable) to a sepecific integer values. It will used when there is 
+        /// string variable exist in the formula. This method will calculate the string formula
+        /// and return a integer type calculate result
+        /// </summary>
+        /// <param name="expression">the string of the formula, used to calculate like "8+9"</param>
+        /// <param name="variableEvaluator">the function to convert string varible into a integer</param>
+        /// <returns> int result, the result of the expression</returns>
+        /// <exception cref="ArgumentException">
+        /// 1. when find a ")" but cannot find a "("
+        /// 2. when the evaluator cannot find a integer to replace variable by using variableEvaluator
+        /// 3. when the end format is wrong (the stack situation when after going over all tokens in expression)
+        ///     which also showed the expression has wrong format such as "1++", "1()3".
+        /// </exception>
         public static int Evaluate(String expression, Lookup variableEvaluator)
         {
             string[] substrings = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
@@ -115,7 +130,8 @@ namespace FormulaEvaluator
         /// <param name="values">The values stack used to poped value to calculate</param>
         /// <param name="operators">The operator stack used to choose the operation </param>
         /// <param name="passedValue">The value will be use in opration</param>
-        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentException"> when value stack has no enough values in it or when the formula
+        /// divide by 0</exception>
         private static void DivideMultipleHelper(Stack<string> values, Stack<string> operators, int passedValue)
         {
             if (operators.Peek() == "*")
@@ -156,8 +172,8 @@ namespace FormulaEvaluator
         /// It will push the result value in values stack. If the top of operators is not + or 
         /// </summary>
         /// <param name="values">the values stack to pop value to calculate</param>
-        /// <param name="operators"></param>
-        /// <exception cref="ArgumentException"></exception>
+        /// <param name="operators">the operators stack to pop operator and do operations</param>
+        /// <exception cref="ArgumentException">When value stack has less than 2 values which do not support the operation</exception>
         private static void AddMinusHelper(Stack<string> values, Stack<string> operators)
         {
             if (operators.Peek() == "+")
