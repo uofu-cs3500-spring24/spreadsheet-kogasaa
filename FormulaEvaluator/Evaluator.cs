@@ -5,7 +5,7 @@ namespace FormulaEvaluator
     public static class Evaluator
     {
         public delegate int Lookup(String variable_name);
-        
+
         public static int Evaluate(String expression, Lookup variableEvaluator)
         {
             string[] substrings = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
@@ -15,130 +15,23 @@ namespace FormulaEvaluator
             {
                 if (int.TryParse(substring, out int integer))
                 {
-                    if(operators.Count > 0) {
-                        if (operators.Peek() == "*")
-                        {
-                            try
-                            {
-                                int result = integer * int.Parse(values.Pop());
-                                operators.Pop();
-                                values.Push(result.ToString());
-                            }
-                            catch
-                            {
-                                throw new Exception("The value stack is empty");
-                            }
-                        }
-                        else if (operators.Peek() == "/")
-                        {
-                            try
-                            {
-                                int result = int.Parse(values.Pop()) / integer;
-                                operators.Pop();
-                                values.Push(result.ToString());
-                            }
-                            catch
-                            {
-                                throw new Exception("The value stack is empty or divided by 0 happened");
-                            }
-                        }
-                        else
-                        {
-                            values.Push(substring);
-                        }
+                    if (operators.Count > 0)
+                    {
+                        DivideMultipleHelper(values, operators, integer);
                     }
                     else
                     {
                         values.Push(substring);
                     }
                 }
-                else if (substring == "+")
+                else if (substring == "+" || substring == "-")
                 {
-                    if(operators.Count > 0)
+                    if (operators.Count > 0)
                     {
-                        if (operators.Peek() == "+")
-                        {
-                            try
-                            {
-                                int value1 = int.Parse(values.Pop());
-                                int value2 = int.Parse(values.Pop());
-                                values.Push((value1 + value2).ToString());
-                                operators.Pop();
-                                operators.Push("+");
-                            }
-                            catch
-                            {
-                                throw new Exception("the value stack contains fewer than 2 values");
-                            }
-                        }
-                        else if (operators.Peek() == "-")
-                        {
-                            try
-                            {
-                                int value1 = int.Parse(values.Pop());
-                                int value2 = int.Parse(values.Pop());
-                                values.Push((value2 - value1).ToString());
-                                operators.Pop();
-                                operators.Push("+");
-                            }
-                            catch
-                            {
-                                throw new Exception("the value stack contains fewer than 2 values");
-                            }
-                        }
-                        else
-                        {
-                            operators.Push("+");
-                        }
+                        AddMinusHelper(values, operators);
                     }
-                    else
-                    {
-                        operators.Push("+");
-                    }
-                }
-                else if (substring == "-")
-                {
-                    if(operators.Count > 0)
-                    {
-                        if (operators.Peek() == "+")
-                        {
-                            try
-                            {
-                                int value1 = int.Parse(values.Pop());
-                                int value2 = int.Parse(values.Pop());
-                                values.Push((value1 + value2).ToString());
-                                operators.Pop();
-                                operators.Push("-");
-                            }
-                            catch
-                            {
-                                throw new Exception("the value stack contains fewer than 2 values");
-                            }
-                        }
-                        else if (operators.Peek() == "-")
-                        {
-                            try
-                            {
-                                int value1 = int.Parse(values.Pop());
-                                int value2 = int.Parse(values.Pop());
-                                values.Push((value2 - value1).ToString());
-                                operators.Pop();
-                                operators.Push("-");
-                            }
-                            catch
-                            {
-                                throw new Exception("the value stack contains fewer than 2 values");
-                            }
-                        }
-                        else
-                        {
-                            operators.Push("-");
-                        }
-                    }
-                    else
-                    {
-                        operators.Push("-");
-                    }
+                    operators.Push(substring);
+
                 }
                 else if (substring == "*" || substring == "/" || substring == "(")
                 {
@@ -146,118 +39,42 @@ namespace FormulaEvaluator
                 }
                 else if (substring == ")")
                 {
-                    if (operators.Peek() == "+")
+                    AddMinusHelper(values, operators);
+                    try
                     {
-                        try
-                        {
-                            int value1 = int.Parse(values.Pop());
-                            int value2 = int.Parse(values.Pop());
-                            values.Push((value1 + value2).ToString());
-                            operators.Pop();
-                        }
-                        catch
-                        {
-                            throw new Exception("the value stack contains fewer than 2 values");
-                        }
+                        DivideMultipleHelper(values, operators, int.Parse(values.Pop()));
                     }
-                    else if (operators.Peek() == "-")
+                    catch
                     {
-                        try
-                        {
-                            int value1 = int.Parse(values.Pop());
-                            int value2 = int.Parse(values.Pop());
-                            values.Push((value2 - value1).ToString());
-                            operators.Pop();
-                        }
-                        catch
-                        {
-                            throw new Exception("the value stack contains fewer than 2 values");
-                        }
+                        throw new Exception("values are not enough");
                     }
-                    else if (operators.Peek() == "*")
-                    {
-                        try
-                        {
-                            int value1 = int.Parse(values.Pop());
-                            int value2 = int.Parse(values.Pop());
-                            int result = value1 * value2;
-                            operators.Pop();
-                            values.Push(result.ToString());
-                        }
-                        catch
-                        {
-                            throw new Exception("the value stack contains fewer than 2 values");
-                        }
-                    }
-                    else if (operators.Peek() == "/")
-                    {
-                        try
-                        {
-                            int value1 = int.Parse(values.Pop());
-                            int value2 = int.Parse(values.Pop());
-                            int result = value2/value1;
-                            operators.Pop();
-                            values.Push(result.ToString());
-                        }
-                        catch
-                        {
-                            throw new Exception("the value stack contains fewer than 2 values or divided by 0 happened");
-                        }
-                    }
-
                     if (operators.Peek() == "(")
                     {
                         operators.Pop();
 
                     }
-                    else 
-                    { 
+                    else
+                    {
                         throw new Exception("missing a (");
                     }
                 }
                 else
                 {
-                    if(substring != "")
+                    if (substring != "")
                     {
                         try
                         {
                             int lookedValue = variableEvaluator(substring);
                             if (operators.Count > 0)
                             {
-                                if (operators.Peek() == "*")
-                                {
-                                    try
-                                    {
-                                        int result = lookedValue * int.Parse(values.Pop());
-                                        operators.Pop();
-                                        values.Push(result.ToString());
-                                    }
-                                    catch
-                                    {
-                                        throw new Exception("The value stack is empty");
-                                    }
-                                }
-                                else if (operators.Peek() == "/")
-                                {
-                                    try
-                                    {
-                                        int result = int.Parse(values.Pop()) / lookedValue;
-                                        operators.Pop();
-                                        values.Push(result.ToString());
-                                    }
-                                    catch
-                                    {
-                                        throw new Exception("The value stack is empty or divided by 0 happened");
-                                    }
-                                }
+                                DivideMultipleHelper(values, operators, lookedValue);
                             }
-
                             else
                             {
                                 values.Push(lookedValue.ToString());
                             }
                         }
-                        catch
+                        catch(NullReferenceException)
                         {
                             throw new Exception("Unknown Variable exist: " + substring);
                         }
@@ -292,6 +109,74 @@ namespace FormulaEvaluator
             {
                 throw new Exception("the this formula has wrong format");
             }
+
         }
+
+        private static void DivideMultipleHelper(Stack<string> values, Stack<string> operators, int lookedValue)
+        {
+            if (operators.Peek() == "*")
+            {
+                try
+                {
+                    int result = lookedValue * int.Parse(values.Pop());
+                    operators.Pop();
+                    values.Push(result.ToString());
+                }
+                catch
+                {
+                    throw new Exception("The value stack is empty");
+                }
+            }
+            else if (operators.Peek() == "/")
+            {
+                try
+                {
+                    int result = int.Parse(values.Pop()) / lookedValue;
+                    operators.Pop();
+                    values.Push(result.ToString());
+                }
+                catch
+                {
+                    throw new Exception("The value stack is empty or divided by 0 happened");
+                }
+            }
+            else
+            {
+                values.Push(lookedValue.ToString());
+            }
+        }
+
+        private static void AddMinusHelper(Stack<string> values, Stack<string> operators)
+        {
+            if (operators.Peek() == "+")
+            {
+                try
+                {
+                    int value1 = int.Parse(values.Pop());
+                    int value2 = int.Parse(values.Pop());
+                    values.Push((value1 + value2).ToString());
+                    operators.Pop();
+                }
+                catch
+                {
+                    throw new Exception("the value stack contains fewer than 2 values");
+                }
+            }
+            else if (operators.Peek() == "-")
+            {
+                try
+                {
+                    int value1 = int.Parse(values.Pop());
+                    int value2 = int.Parse(values.Pop());
+                    values.Push((value2 - value1).ToString());
+                    operators.Pop();
+                }
+                catch
+                {
+                    throw new Exception("the value stack contains fewer than 2 values");
+                }
+            }
+        }
+
     }
 }
