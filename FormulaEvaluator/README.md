@@ -17,7 +17,14 @@ helper method to simplify the code. The core method in this libaray is evaluate.
 look up method in. Then it will divide in to different tokens to calculated it. Then return a method, like pass "5+(9-4/2)*3" will
 get 26.
 
+# Assignment Specific Topics
+None
+
+# Consulted Peers:
+None
+
 # Referencing
 CS3500 Assignment One Duide - https://docs.google.com/document/d/1eB3YWaXpMuaRg4c28fJFNwlyZwzib10twioAJxu0z0A/edit?usp=sharing
 Microsoft Learning - https://learn.microsoft.com/en-us/visualstudio/get-started/visual-studio-ide?view=vs-2022 (I study the gen-
 reic stack class from the Microsoft Learning)
+
