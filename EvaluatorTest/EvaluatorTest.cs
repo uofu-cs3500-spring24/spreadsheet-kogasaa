@@ -1,4 +1,27 @@
 ﻿// See https://aka.ms/new-console-template for more information
+/// <summary>
+/// Author: Bingkun Han
+/// Partner: None
+/// Date: 17th-Jan-2024
+/// Course: CS3500 Software Practice, 2024 Spring
+/// Copyright: CS 3500 and Bingkun Han - This work may not
+///            be copied for use in Academic Coursework.
+///
+/// I, Bingkun Han, certify that I wrote this code from scratch and
+/// did not copy it in part or whole from another source.  All
+/// references used in the completion of the assignments are cited
+/// in my README file.
+///
+/// File Contents
+/// This is a formula evaoluator test file, It is a console application.
+/// It will use console printing method to test if all methods are rights,
+/// And also it will test the exception throwing. I learn the test template from
+/// the assignment instruction.
+/// </summary>
+/// 
+
+
+//This is to test all the possible right situation to check if all of them are right.
 Console.WriteLine("Hello, World!");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("1", null) + "right is 1");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5+3", null) + "right is 8");
@@ -13,7 +36,6 @@ Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("3*3*3", null) + "right is
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-(3/1+2)", null) + "right is 0");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-(3/1-2)", null) + "right is 4");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-2)+5-(3/1+2))+8", null) + "right is 12");
-
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-3/one", a => { return 1; }) + "  right is 2");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("3*3*w234245sdf", a => { return 3; }) + "  right is 27");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-(3/1+ewre)", a => { return 2; }) + "  right is 0");
@@ -24,13 +46,13 @@ Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(4)*(4)/(4)", null) + "  
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-jdf))*(5-(3/1-jdf))/(5-(3/1-jdf))", a => { return 2; }) + "  right is 4");
 
 
-
+//This will test all the wrong edge situation to check if it can throw argument exception properly
 try
 {
     FormulaEvaluator.Evaluator.Evaluate("5-3/0", null);
     Console.WriteLine("Divide by 0 Exception not worked");
 }
-catch (Exception)
+catch (ArgumentException)
 {
     Console.WriteLine("Divide by 0 Exception worked");
 }
@@ -40,7 +62,7 @@ try
     FormulaEvaluator.Evaluator.Evaluate("5-3/woerd", null);
     Console.WriteLine("Found unknown variables not worked");
 }
-catch (Exception)
+catch (ArgumentException)
 {
     Console.WriteLine("Found unknown variables worked");
 }
@@ -50,7 +72,7 @@ try
     FormulaEvaluator.Evaluator.Evaluate("5-3/woerd", a =>{ return 0; });
     Console.WriteLine("Cant divide by 0 not worked");
 }
-catch (Exception)
+catch (ArgumentException)
 {
     Console.WriteLine("Cant divide by 0 worked");
 }
@@ -60,7 +82,7 @@ try
     FormulaEvaluator.Evaluator.Evaluate("*7", null);
     Console.WriteLine("Cant found when value stack empty");
 }
-catch (Exception)
+catch (ArgumentException)
 {
     Console.WriteLine("Can find value stack is empty");
 }
@@ -70,7 +92,7 @@ try
     FormulaEvaluator.Evaluator.Evaluate("unknown+", a =>{ return 3; });
     Console.WriteLine("Cant found when value stack empty");
 }
-catch (Exception)
+catch (ArgumentException)
 {
     Console.WriteLine("Can find value stack is empty");
 }
@@ -80,7 +102,7 @@ try
     FormulaEvaluator.Evaluator.Evaluate("++()()(+", a => { return 3; });
     Console.WriteLine("Cant found when format is not right");
 }
-catch (Exception)
+catch (ArgumentException)
 {
     Console.WriteLine("Can find wrong format");
 }

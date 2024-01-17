@@ -1,5 +1,24 @@
 ﻿using System.Text.RegularExpressions;
 
+/// <summary>
+/// Author: Bingkun Han
+/// Partner: None
+/// Date: 17th-Jan-2024
+/// Course: CS3500 Software Practice, 2024 Spring
+/// Copyright: CS 3500 and Bingkun Han - This work may not
+///            be copied for use in Academic Coursework.
+///
+/// I, Bingkun Han, certify that I wrote this code from scratch and
+/// did not copy it in part or whole from another source.  All
+/// references used in the completion of the assignments are cited
+/// in my README file.
+///
+/// File Contents
+/// This is a formula evaoluator library. It has a core method - Evaluate. It will
+/// pass a string formula and a variable lookup method to calculate and retun the 
+/// result of this formula. It has a delegate decleration and two helper methods. 
+/// Help methods simplify the formula calculation processes.
+/// </summary>
 namespace FormulaEvaluator
 {
     public static class Evaluator
@@ -24,6 +43,8 @@ namespace FormulaEvaluator
         public static int Evaluate(String expression, Lookup variableEvaluator)
         {
             string[] substrings = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
+
+            // I learnt how to use generic stack class from microsoft learning webpage
             Stack<String> values = new Stack<String>();
             Stack<String> operators = new Stack<String>();
             foreach (String token in substrings)
