@@ -40,18 +40,13 @@ namespace FormulaEvaluator
                 else if (substring == ")")
                 {
                     AddMinusHelper(values, operators);
-                    try
-                    {
-                        DivideMultipleHelper(values, operators, int.Parse(values.Pop()));
-                    }
-                    catch
-                    {
-                        throw new Exception("values are not enough");
-                    }
                     if (operators.Peek() == "(")
                     {
                         operators.Pop();
-
+                        if (values.Count > 1)
+                        {
+                            DivideMultipleHelper(values, operators, int.Parse(values.Pop()));
+                        }
                     }
                     else
                     {

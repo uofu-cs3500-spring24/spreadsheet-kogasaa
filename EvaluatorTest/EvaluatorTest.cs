@@ -19,6 +19,11 @@ Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("3*3*w234245sdf", a => { r
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-(3/1+ewre)", a => { return 2; }) + "  right is 0");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-(3/1-jdf)", a => { return 2; }) + "  right is 4");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-2)+five-(3/1+2))+8", a => { return 5; }) + "  right is 12");
+Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-2))*(5-(3/1-2))", null) + "  right is 16");
+Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(4)*(4)/(4)", null) + "  right is 4");
+Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-jdf))*(5-(3/1-jdf))/(5-(3/1-jdf))", a => { return 2; }) + "  right is 4");
+
+
 
 try
 {
