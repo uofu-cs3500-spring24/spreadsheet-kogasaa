@@ -11,9 +11,9 @@ namespace FormulaEvaluator
             string[] substrings = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
             Stack<String> values = new Stack<String>();
             Stack<String> operators = new Stack<String>();
-            foreach (String substring in substrings)
+            foreach (String token in substrings)
             {
-                if (int.TryParse(substring, out int integer))
+                if (int.TryParse(token, out int integer))
                 {
                     if (operators.Count > 0)
                     {
@@ -21,23 +21,23 @@ namespace FormulaEvaluator
                     }
                     else
                     {
-                        values.Push(substring);
+                        values.Push(token);
                     }
                 }
-                else if (substring == "+" || substring == "-")
+                else if (token == "+" || token == "-")
                 {
                     if (operators.Count > 0)
                     {
                         AddMinusHelper(values, operators);
                     }
-                    operators.Push(substring);
+                    operators.Push(token);
 
                 }
-                else if (substring == "*" || substring == "/" || substring == "(")
+                else if (token == "*" || token == "/" || token == "(")
                 {
-                    operators.Push(substring);
+                    operators.Push(token);
                 }
-                else if (substring == ")")
+                else if (token == ")")
                 {
                     AddMinusHelper(values, operators);
                     if (operators.Peek() == "(")
@@ -50,16 +50,16 @@ namespace FormulaEvaluator
                     }
                     else
                     {
-                        throw new Exception("missing a (");
+                        throw new ArgumentException("missing a (");
                     }
                 }
                 else
                 {
-                    if (substring != "")
+                    if (token != "")
                     {
                         try
                         {
-                            int lookedValue = variableEvaluator(substring);
+                            int lookedValue = variableEvaluator(token);
                             if (operators.Count > 0)
                             {
                                 DivideMultipleHelper(values, operators, lookedValue);
@@ -69,9 +69,9 @@ namespace FormulaEvaluator
                                 values.Push(lookedValue.ToString());
                             }
                         }
-                        catch(NullReferenceException)
+                        catch
                         {
-                            throw new Exception("Unknown Variable exist: " + substring);
+                            throw new ArgumentException("Unknown Variable exist: " + token);
                         }
                     }
                 }
@@ -102,45 +102,62 @@ namespace FormulaEvaluator
             }
             else
             {
-                throw new Exception("the this formula has wrong format");
+                throw new ArgumentException("the this formula has wrong format");
             }
-
         }
 
-        private static void DivideMultipleHelper(Stack<string> values, Stack<string> operators, int lookedValue)
+        /// <summary>
+        /// This is method will do divide or multiply operation by using target value, values stack poped value and 
+        /// operators poped operators. If operators stack's poped operator is "/", it will do valuesPopedValue/pass-
+        /// edValue, or if it is * it will multiply two of them. IF peek operator is neither / or * it will do nothing.
+        /// then it will push the new result value in the values stack
+        /// </summary>
+        /// <param name="values">The values stack used to poped value to calculate</param>
+        /// <param name="operators">The operator stack used to choose the operation </param>
+        /// <param name="passedValue">The value will be use in opration</param>
+        /// <exception cref="ArgumentException"></exception>
+        private static void DivideMultipleHelper(Stack<string> values, Stack<string> operators, int passedValue)
         {
             if (operators.Peek() == "*")
             {
                 try
                 {
-                    int result = lookedValue * int.Parse(values.Pop());
+                    int result = passedValue * int.Parse(values.Pop());
                     operators.Pop();
                     values.Push(result.ToString());
                 }
                 catch
                 {
-                    throw new Exception("The value stack is empty");
+                    throw new ArgumentException("The value stack is empty");
                 }
             }
             else if (operators.Peek() == "/")
             {
                 try
                 {
-                    int result = int.Parse(values.Pop()) / lookedValue;
+                    int result = int.Parse(values.Pop()) / passedValue;
                     operators.Pop();
                     values.Push(result.ToString());
                 }
                 catch
                 {
-                    throw new Exception("The value stack is empty or divided by 0 happened");
+                    throw new ArgumentException("The value stack is empty or divided by 0 happened");
                 }
             }
             else
             {
-                values.Push(lookedValue.ToString());
+                values.Push(passedValue.ToString());
             }
         }
 
+        /// <summary>
+        /// This method will do add and minus operation if the top of the oprator stack is + or -. If the top is either + or -
+        /// It will pop two values from values stack and sum them or substract them depending on the top's command + or -. Then 
+        /// It will push the result value in values stack. If the top of operators is not + or 
+        /// </summary>
+        /// <param name="values">the values stack to pop value to calculate</param>
+        /// <param name="operators"></param>
+        /// <exception cref="ArgumentException"></exception>
         private static void AddMinusHelper(Stack<string> values, Stack<string> operators)
         {
             if (operators.Peek() == "+")
@@ -154,7 +171,7 @@ namespace FormulaEvaluator
                 }
                 catch
                 {
-                    throw new Exception("the value stack contains fewer than 2 values");
+                    throw new ArgumentException("the value stack contains fewer than 2 values");
                 }
             }
             else if (operators.Peek() == "-")
@@ -168,7 +185,7 @@ namespace FormulaEvaluator
                 }
                 catch
                 {
-                    throw new Exception("the value stack contains fewer than 2 values");
+                    throw new ArgumentException("the value stack contains fewer than 2 values");
                 }
             }
         }

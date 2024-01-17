@@ -74,3 +74,13 @@ catch (Exception)
 {
     Console.WriteLine("Can find value stack is empty");
 }
+
+try
+{
+    FormulaEvaluator.Evaluator.Evaluate("++()()(+", a => { return 3; });
+    Console.WriteLine("Cant found when format is not right");
+}
+catch (Exception)
+{
+    Console.WriteLine("Can find wrong format");
+}
