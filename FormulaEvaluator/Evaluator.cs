@@ -23,6 +23,13 @@ namespace FormulaEvaluator
 {
     public static class Evaluator
     {
+        /// <summary>
+        /// This is the delegate of the variable lookup method. This method will
+        /// take a string in and retur a int, which convert a variable to a value
+        /// like convert from "a1" to 7
+        /// </summary>
+        /// <param name="variable_name">The string if the variable like "a1"</param>
+        /// <returns> The value of that variable</returns>
         public delegate int Lookup(String variable_name);
 
         /// <summary>
