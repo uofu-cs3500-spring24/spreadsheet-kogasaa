@@ -44,6 +44,8 @@ Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-2)+five-(3/1+2))+
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-2))*(5-(3/1-2))", null) + "  right is 16");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(4)*(4)/(4)", null) + "  right is 4");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-jdf))*(5-(3/1-jdf))/(5-(3/1-jdf))", a => { return 2; }) + "  right is 4");
+Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(4)*(4)/(a1)", a=>-1) + "  right is -16");
+
 
 
 //This will test all the wrong edge situation to check if it can throw argument exception properly
