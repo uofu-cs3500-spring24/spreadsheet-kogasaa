@@ -36,14 +36,14 @@ Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("3*3*3", null) + "right is
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-(3/1+2)", null) + "right is 0");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-(3/1-2)", null) + "right is 4");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-2)+5-(3/1+2))+8", null) + "right is 12");
-Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-3/one", a => { return 1; }) + "  right is 2");
-Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("3*3*w234245sdf", a => { return 3; }) + "  right is 27");
-Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-(3/1+ewre)", a => { return 2; }) + "  right is 0");
-Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-(3/1-jdf)", a => { return 2; }) + "  right is 4");
-Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-2)+five-(3/1+2))+8", a => { return 5; }) + "  right is 12");
+Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-3/a1", a => { return 1; }) + "  right is 2");
+Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("3*3*w2342", a => { return 3; }) + "  right is 27");
+Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-(3/1+ewre4)", a => { return 2; }) + "  right is 0");
+Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("5-(3/1-jdf4)", a => { return 2; }) + "  right is 4");
+Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-2)+five3-(3/1+2))+8", a => { return 5; }) + "  right is 12");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-2))*(5-(3/1-2))", null) + "  right is 16");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(4)*(4)/(4)", null) + "  right is 4");
-Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-jdf))*(5-(3/1-jdf))/(5-(3/1-jdf))", a => { return 2; }) + "  right is 4");
+Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(5-(3/1-jdf3))*(5-(3/1-jdf3))/(5-(3/1-jdf3))", a => { return 2; }) + "  right is 4");
 Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate("(4)*(4)/(a1)", a=>-1) + "  right is -16");
 
 
@@ -107,4 +107,15 @@ try
 catch (ArgumentException)
 {
     Console.WriteLine("Can find wrong format");
+}
+
+
+try
+{
+    FormulaEvaluator.Evaluator.Evaluate("8ea", a => { return 3; });
+    Console.WriteLine("Cant found when format is not right");
+}
+catch (ArgumentException)
+{
+    Console.WriteLine("Can find wrong format of a variable");
 }

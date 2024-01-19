@@ -24,6 +24,12 @@ namespace FormulaEvaluator
     public static class Evaluator
     {
         /// <summary>
+        /// this is the matchPattern used to check if the variables fit the format rule
+        /// </summary>
+        private static string matchPattern = @"^[a-zA-Z]+[0-9]+$";
+
+
+        /// <summary>
         /// This is the delegate of the variable lookup method. This method will
         /// take a string in and retur a int, which convert a variable to a value
         /// like convert from "a1" to 7
@@ -102,6 +108,11 @@ namespace FormulaEvaluator
                     {
                         try
                         {
+                            //I learn this from microsoft learning
+                            if(!Regex.IsMatch(token, matchPattern))
+                            {
+                                throw new ArgumentException($"{token} does not match pattern");
+                            }
                             int lookedValue = variableEvaluator(token);
                             if (operators.Count > 0)
                             {
