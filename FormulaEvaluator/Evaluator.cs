@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-/// <summary>
+﻿/// <summary>
 /// Author: Bingkun Han
 /// Partner: None
 /// Date: 17th-Jan-2024
@@ -19,6 +17,7 @@
 /// result of this formula. It has a delegate decleration and two helper methods. 
 /// Help methods simplify the formula calculation processes.
 /// </summary>
+using System.Text.RegularExpressions;
 namespace FormulaEvaluator
 {
     public static class Evaluator
