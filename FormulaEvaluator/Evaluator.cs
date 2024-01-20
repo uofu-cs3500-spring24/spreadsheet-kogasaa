@@ -108,7 +108,7 @@ namespace FormulaEvaluator
                         try
                         {
                             //I learn this from microsoft learning
-                            if(!Regex.IsMatch(token, matchPattern))
+                            if (!Regex.IsMatch(token, matchPattern))
                             {
                                 throw new ArgumentException($"{token} does not match pattern");
                             }
@@ -230,6 +230,5 @@ namespace FormulaEvaluator
                 }
             }
         }
-
     }
 }
