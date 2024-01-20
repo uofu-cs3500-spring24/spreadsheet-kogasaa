@@ -61,11 +61,11 @@ namespace FormulaEvaluator
             Stack<String> operators = new Stack<String>();
             foreach (String token in substrings)
             {
-                if (int.TryParse(token, out int integer))
+                if (int.TryParse(token, out int tokenIntValue))
                 {
                     if (operators.Count > 0)
                     {
-                        DivideMultipleHelper(values, operators, integer);
+                        DivideMultipleHelper(values, operators, tokenIntValue);
                     }
                     else
                     {
@@ -103,7 +103,7 @@ namespace FormulaEvaluator
                 }
                 else
                 {
-                    if (token != "")
+                    if (token != "" && token != " ")
                     {
                         try
                         {
@@ -136,20 +136,7 @@ namespace FormulaEvaluator
             }
             else if (values.Count == 2 && operators.Count == 1)
             {
-                if (operators.Peek() == "+")
-                {
-                    int value1 = int.Parse(values.Pop());
-                    int value2 = int.Parse(values.Pop());
-                    values.Push((value1 + value2).ToString());
-                    operators.Pop();
-                }
-                else if (operators.Peek() == "-")
-                {
-                    int value1 = int.Parse(values.Pop());
-                    int value2 = int.Parse(values.Pop());
-                    values.Push((value2 - value1).ToString());
-                    operators.Pop();
-                }
+                AddMinusHelper(values, operators);
                 int finalResult = int.Parse(values.Pop());
                 return finalResult;
             }

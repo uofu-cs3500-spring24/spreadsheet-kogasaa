@@ -13,7 +13,7 @@ Copyright: CS 3500 and Bingkun Han - This work may not be copied for use in Acad
 # Overview of the Spreadsheet functionality
 
 The Spreadsheet making is still on progress, now it has a formula evaluator library to calculate the 
-formula and get right answer from the formla
+formula and get right answer from the formla. Futrue extensions are still in prgress.
 
 
 # Time Expenditures:
