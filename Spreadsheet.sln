@@ -5,7 +5,7 @@ VisualStudioVersion = 17.8.34408.163
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FormulaEvaluator", "FormulaEvaluator\FormulaEvaluator.csproj", "{01DD42EC-1637-440B-874D-E381ACAC7BE9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EvaluatorTest", "EvaluatorTest\EvaluatorTest.csproj", "{E6230365-60E0-415C-9E00-6CB614BCF3A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EvaluatorTester", "EvaluatorTest\EvaluatorTester.csproj", "{E6230365-60E0-415C-9E00-6CB614BCF3A2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1E1B9B7B-D0A7-4567-9665-CEC3575F1123}"
 	ProjectSection(SolutionItems) = preProject
