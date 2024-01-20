@@ -20,7 +20,7 @@ Delegates using for find the values of the string cariables.
 GitHub version control technology
 
 # Consulted Peers
-Bingying Wang We talk about if we need to regard the - as a negative sign
+None
 
 # Referencing
 CS3500 Assignment One Duide - https://docs.google.com/document/d/1eB3YWaXpMuaRg4c28fJFNwlyZwzib10twioAJxu0z0A/edit?usp=sharing
