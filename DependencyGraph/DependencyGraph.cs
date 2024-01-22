@@ -12,6 +12,7 @@ using System.Text;
 namespace SpreadsheetUtilities
 {
 
+
     /// <summary>
     /// (s1,t1) is an ordered pair of strings
     /// t1 depends on s1; s1 must be evaluated before t1
@@ -42,10 +43,17 @@ namespace SpreadsheetUtilities
     public class DependencyGraph
     {
         /// <summary>
+        /// I choose using 2 string items tuple as the basic data structure for the graph
+        /// the second item in tuple depends on the first item
+        /// </summary>
+        private HashSet<Tuple<string, string>> allDependencies;
+
+        /// <summary>
         /// Creates an empty DependencyGraph.
         /// </summary>
         public DependencyGraph()
         {
+            allDependencies = new HashSet<Tuple<string, string>>();
         }
 
 
@@ -54,7 +62,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int Size
         {
-            get { return 0; }
+            get { return allDependencies.Count; }
         }
 
 
@@ -67,7 +75,18 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            get { return 0; }
+            get 
+            {
+                int sizeOfDependees = 0;
+                foreach (Tuple<string, string> relation in allDependencies)
+                {
+                    if (relation.Item2 == s)
+                    {
+                        sizeOfDependees++;
+                    }
+                }
+                return sizeOfDependees; 
+            }
         }
 
 
@@ -76,6 +95,13 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependents(string s)
         {
+            foreach (Tuple<string, string> relation in allDependencies)
+            {
+                if (relation.Item1 == s)
+                {
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -85,6 +111,13 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependees(string s)
         {
+            foreach (Tuple<string, string> relation in allDependencies)
+            {
+                if (relation.Item2 == s)
+                {
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -94,7 +127,15 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return null;
+            List<string> listOfDependents = new List<string>();
+            foreach (Tuple<string, string> relation in allDependencies)
+            {
+                if (relation.Item1 == s)
+                {
+                    listOfDependents.Add(relation.Item2);
+                }
+            }
+            return listOfDependents;
         }
 
         /// <summary>
@@ -102,7 +143,15 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return null;
+            List<string> listOfDependees = new List<string>();
+            foreach (Tuple<string, string> relation in allDependencies)
+            {
+                if (relation.Item2 == s)
+                {
+                    listOfDependees.Add(relation.Item1);
+                }
+            }
+            return listOfDependees;
         }
 
 
@@ -118,6 +167,7 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
+            allDependencies.Add(new Tuple<string, string>(s, t));
         }
 
 
@@ -128,6 +178,7 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
+            allDependencies.Remove(new Tuple<string, string>(s, t));
         }
 
 
@@ -137,6 +188,17 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            foreach (Tuple<string, string> relation in allDependencies)
+            {
+                if (relation.Item1 == s)
+                {
+                    allDependencies.Remove(relation);
+                }
+            }
+            foreach (string newDependentToken in newDependents)
+            {
+                AddDependency(s, newDependentToken);
+            }
         }
 
 
@@ -146,6 +208,17 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
+            foreach (Tuple<string, string> relation in allDependencies)
+            {
+                if (relation.Item2 == s)
+                {
+                    allDependencies.Remove(relation);
+                }
+            }
+            foreach (string newDependeeToken in newDependees)
+            {
+                AddDependency(newDependeeToken, s);
+            }
         }
 
     }
