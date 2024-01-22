@@ -30,6 +30,6 @@ Test Driven Development.
 None. I read all the instructions of the assignment, and I think it is not difficult so I did all by myself
 
 # Referencing
-CS3500 Assignment Two Duide - https://docs.google.com/document/d/1eB3YWaXpMuaRg4c28fJFNwlyZwzib10twioAJxu0z0A/edit?usp=sharing
-Microsoft Learning - https://learn.microsoft.com/en-us/visualstudio/get-started/visual-studio-ide?view=vs-2022 (I study the gen-
-reic stack class from the Microsoft Learning)
+CS3500 Assignment Two Duide - https://utah.instructure.com/courses/940768/assignments/13804648
+Microsoft Learning - https://learn.microsoft.com/en-us/visualstudio/get-started/visual-studio-ide?view=vs-2022 (I study the HashSet<T> and Tuple
+classes from the Microsoft Learning)
