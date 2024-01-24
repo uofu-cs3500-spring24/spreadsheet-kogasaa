@@ -42,18 +42,23 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class DependencyGraph
     {
-        /// <summary>
-        /// I choose using 2 string items tuple as the basic data structure for the graph
-        /// the second item in tuple depends on the first item
-        /// </summary>
-        private HashSet<Tuple<string, string>> allDependencies;
+        // In dependentGroup the key is dependees and value is hashset of dependents
+        private Dictionary<string, HashSet<string>> dee_dentGroup;
+
+        //In dependeeGroup the key is dependents and value is hashset of dependees
+        private Dictionary<string, HashSet<string>> dent_deeGroup;
+
+        //The size of the relations
+        int numOfRelations;
 
         /// <summary>
         /// Creates an empty DependencyGraph.
         /// </summary>
         public DependencyGraph()
         {
-            allDependencies = new HashSet<Tuple<string, string>>();
+            dee_dentGroup = new Dictionary<string, HashSet<string>>();
+            dent_deeGroup = new Dictionary<string, HashSet<string>>();
+            numOfRelations = 0;
         }
 
 
@@ -62,7 +67,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int Size
         {
-            get { return allDependencies.Count; }
+            get { return numOfRelations; }
         }
 
 
@@ -75,18 +80,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            get 
-            {
-                int sizeOfDependees = 0;
-                foreach (Tuple<string, string> relation in allDependencies)
-                {
-                    if (relation.Item2 == s)
-                    {
-                        sizeOfDependees++;
-                    }
-                }
-                return sizeOfDependees; 
-            }
+            get { return dent_deeGroup[s].Count; }
         }
 
 
@@ -95,14 +89,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependents(string s)
         {
-            foreach (Tuple<string, string> relation in allDependencies)
-            {
-                if (relation.Item1 == s)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return dee_dentGroup[s].Count > 0;
         }
 
 
@@ -111,14 +98,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependees(string s)
         {
-            foreach (Tuple<string, string> relation in allDependencies)
-            {
-                if (relation.Item2 == s)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return dent_deeGroup[s].Count > 0;
         }
 
 
@@ -127,15 +107,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            List<string> listOfDependents = new List<string>();
-            foreach (Tuple<string, string> relation in allDependencies)
-            {
-                if (relation.Item1 == s)
-                {
-                    listOfDependents.Add(relation.Item2);
-                }
-            }
-            return listOfDependents;
+            return dee_dentGroup[s];
         }
 
         /// <summary>
@@ -143,15 +115,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            List<string> listOfDependees = new List<string>();
-            foreach (Tuple<string, string> relation in allDependencies)
-            {
-                if (relation.Item2 == s)
-                {
-                    listOfDependees.Add(relation.Item1);
-                }
-            }
-            return listOfDependees;
+            return dent_deeGroup[s];
         }
 
 
@@ -167,7 +131,9 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
-            allDependencies.Add(new Tuple<string, string>(s, t));
+            dent_deeGroup[t].Add(s);
+            dee_dentGroup[s].Add(t);
+            numOfRelations++;
         }
 
 
@@ -178,7 +144,9 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
-            allDependencies.Remove(new Tuple<string, string>(s, t));
+            dent_deeGroup[t].Remove(s);
+            dee_dentGroup[s].Remove(t);
+            numOfRelations--;
         }
 
 
@@ -188,16 +156,14 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
-            foreach (Tuple<string, string> relation in allDependencies)
+            foreach (string oldDent in dee_dentGroup[s])
             {
-                if (relation.Item1 == s)
-                {
-                    allDependencies.Remove(relation);
-                }
+                RemoveDependency(s, oldDent);
             }
-            foreach (string newDependentToken in newDependents)
+
+            foreach (string newDent in newDependents)
             {
-                AddDependency(s, newDependentToken);
+                AddDependency(s, newDent);
             }
         }
 
@@ -208,16 +174,14 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
-            foreach (Tuple<string, string> relation in allDependencies)
+            foreach (string oldDee in dent_deeGroup[s])
             {
-                if (relation.Item2 == s)
-                {
-                    allDependencies.Remove(relation);
-                }
+                RemoveDependency(oldDee, s);
             }
-            foreach (string newDependeeToken in newDependees)
+
+            foreach (string newDee in newDependees)
             {
-                AddDependency(newDependeeToken, s);
+                AddDependency(newDee, s);
             }
         }
 
