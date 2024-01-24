@@ -89,7 +89,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependents(string s)
         {
-            return dee_dentGroup[s].Count > 0;
+            return dee_dentGroup.ContainsKey(s) && dee_dentGroup[s].Count > 0;
         }
 
 
@@ -98,7 +98,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependees(string s)
         {
-            return dent_deeGroup[s].Count > 0;
+            return dent_deeGroup.ContainsKey(s) && dent_deeGroup[s].Count > 0;
         }
 
 
@@ -107,7 +107,14 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return dee_dentGroup[s];
+            if (dee_dentGroup.ContainsKey(s))
+            {
+                return dee_dentGroup[s];
+            }
+            else 
+            { 
+                return Enumerable.Empty<string>(); 
+            }
         }
 
         /// <summary>
@@ -115,7 +122,14 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return dent_deeGroup[s];
+            if (dent_deeGroup.ContainsKey(s))
+            {
+                return dent_deeGroup[s];
+            }
+            else
+            {
+                return new HashSet<string>();
+            }
         }
 
 
@@ -131,10 +145,23 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
-            dent_deeGroup[t].Add(s);
-            dee_dentGroup[s].Add(t);
-            numOfRelations++;
+            if (!dee_dentGroup.ContainsKey(s))
+            {
+                dee_dentGroup.Add(s, new HashSet<string>());
+            }
+
+            if (!dent_deeGroup.ContainsKey(t))
+            {
+                dent_deeGroup.Add(t, new HashSet<string>());
+            }
+
+            if(dent_deeGroup[t].Add(s) && dee_dentGroup[s].Add(t))
+            {
+                numOfRelations++;
+            }
+            
         }
+        
 
 
         /// <summary>
@@ -144,11 +171,21 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
-            dent_deeGroup[t].Remove(s);
-            dee_dentGroup[s].Remove(t);
-            numOfRelations--;
-        }
+            if (!dee_dentGroup.ContainsKey(s))
+            {
+                return;
+            }
 
+            if (!dent_deeGroup.ContainsKey(t))
+            {
+                return;
+            }
+
+            if (dent_deeGroup[t].Remove(s) && dee_dentGroup[s].Remove(t))
+            {
+                numOfRelations--;
+            }
+        }
 
         /// <summary>
         /// Removes all existing ordered pairs of the form (s,r).  Then, for each
@@ -156,6 +193,10 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            if (!dee_dentGroup.ContainsKey(s))
+            {
+                return;
+            }
             foreach (string oldDent in dee_dentGroup[s])
             {
                 RemoveDependency(s, oldDent);
@@ -174,6 +215,10 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
+            if (dent_deeGroup.ContainsKey(s))
+            {
+                return;
+            }
             foreach (string oldDee in dent_deeGroup[s])
             {
                 RemoveDependency(oldDee, s);
