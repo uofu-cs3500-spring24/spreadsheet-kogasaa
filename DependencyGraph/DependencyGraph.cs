@@ -52,7 +52,8 @@ namespace SpreadsheetUtilities
         int numOfRelations;
 
         /// <summary>
-        /// Creates an empty DependencyGraph.
+        /// Creates an empty DependencyGraph by creating the empty dee_dentGroup
+        /// and dent_deeGroup dictionary and set num of relations as 0
         /// </summary>
         public DependencyGraph()
         {
@@ -62,9 +63,7 @@ namespace SpreadsheetUtilities
         }
 
 
-        /// <summary>
-        /// The number of ordered pairs in the DependencyGraph.
-        /// </summary>
+        
         public int Size
         {
             get { return numOfRelations; }
@@ -177,8 +176,12 @@ namespace SpreadsheetUtilities
         /// <summary>
         /// Removes the ordered pair (s,t), if it exists
         /// </summary>
-        /// <param name="s"></param>
-        /// <param name="t"></param>
+        /// <param name="s"> 
+        ///     dependee s 
+        /// </param>
+        /// <param name="t"> 
+        ///     dependent t
+        /// </param>
         public void RemoveDependency(string s, string t)
         {
             if (!dee_dentGroup.ContainsKey(s))
@@ -239,7 +242,5 @@ namespace SpreadsheetUtilities
                 AddDependency(newDee, s);
             }
         }
-
     }
-
 }
