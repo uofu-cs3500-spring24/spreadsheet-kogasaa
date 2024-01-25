@@ -11,7 +11,8 @@ Copyright: CS 3500 and Bingkun Han - This work may not be copied for use in Acad
 
 # Comments to Evaluators
 This is the Tests of the Dependency with the starter Code inside it. I firstly cope the start code from the instruciton
-Then I use the tests to make sure my implementation is correct.
+Then I use the tests to make sure my implementation is correct. Then I added my own tests in it to make sure the code 
+coverage is 100%
 
 
 # Assignment Specific Topics
@@ -23,5 +24,5 @@ None. I read all the instructions of the assignment, and I think it is not diffi
 
 # Referencing
 CS3500 Assignment Two Duide - https://utah.instructure.com/courses/940768/assignments/13804648
-Microsoft Learning - https://learn.microsoft.com/en-us/visualstudio/get-started/visual-studio-ide?view=vs-2022 (I study the HashSet<T> and Tuple
-classes from the Microsoft Learning)
+Microsoft Learning - https://learn.microsoft.com/en-us/visualstudio/get-started/visual-studio-ide?view=vs-2022 (I study the HashSet<T> and 
+Dictionary classes from the Microsoft Learning)

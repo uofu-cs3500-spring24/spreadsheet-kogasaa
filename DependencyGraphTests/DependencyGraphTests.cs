@@ -226,18 +226,18 @@ namespace DependencyGraphTests
         public void GetTest()
         {
             DependencyGraph graph = new DependencyGraph();
-            for(int i = 0; i < 1000; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 graph.AddDependency($"{i}", "1002");
             }
-            for(int i = 0; i < 200; i++)
+            for (int i = 0; i < 200; i++)
             {
-                graph.RemoveDependency(""+i*5, "1002");
+                graph.RemoveDependency("" + i * 5, "1002");
             }
             Assert.AreEqual(800, graph["1002"]);
-            for(int i = 0;i < 1000; i++)
+            for (int i = 0; i < 1000; i++)
             {
-                Assert.AreEqual(0, graph[""+i]);
+                Assert.AreEqual(0, graph["" + i]);
             }
             graph.ReplaceDependees("1002", new HashSet<string>());
             Assert.AreEqual(0, graph["1002"]);
@@ -252,8 +252,8 @@ namespace DependencyGraphTests
             DependencyGraph graph = new DependencyGraph();
             Assert.IsFalse(graph.HasDependents("1"));
             Assert.IsFalse(graph.HasDependees("1"));
-            graph.AddDependency("1","2");
-            graph.AddDependency("0","1");
+            graph.AddDependency("1", "2");
+            graph.AddDependency("0", "1");
             Assert.IsTrue(graph.HasDependents("1"));
             Assert.IsTrue(graph.HasDependees("1"));
             graph.ReplaceDependees("1", new HashSet<string>());
@@ -296,7 +296,7 @@ namespace DependencyGraphTests
         {
             DependencyGraph graph = new DependencyGraph();
             int BeforeNumOfDee = graph["1"];
-            HashSet<string> newDees = new HashSet<string> { "0", "-1", "-3"};
+            HashSet<string> newDees = new HashSet<string> { "0", "-1", "-3" };
             graph.ReplaceDependees("1", newDees);
             int AfterNumOfDee = graph["1"];
             Assert.IsFalse(BeforeNumOfDee == AfterNumOfDee);

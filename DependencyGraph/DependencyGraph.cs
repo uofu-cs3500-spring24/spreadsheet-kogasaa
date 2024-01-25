@@ -63,7 +63,9 @@ namespace SpreadsheetUtilities
         }
 
 
-        
+        /// <summary>
+        /// return how many relations exist in the dependency graph
+        /// </summary>
         public int Size
         {
             get { return numOfRelations; }
@@ -79,7 +81,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            get 
+            get
             {
                 if (!dent_deeGroup.ContainsKey(s))
                 {
@@ -120,9 +122,9 @@ namespace SpreadsheetUtilities
             {
                 return dee_dentGroup[s];
             }
-            else 
-            { 
-                return Enumerable.Empty<string>(); 
+            else
+            {
+                return Enumerable.Empty<string>();
             }
         }
 
@@ -164,14 +166,12 @@ namespace SpreadsheetUtilities
                 dent_deeGroup.Add(t, new HashSet<string>());
             }
 
-            if(dent_deeGroup[t].Add(s) && dee_dentGroup[s].Add(t))
+            if (dent_deeGroup[t].Add(s) && dee_dentGroup[s].Add(t))
             {
                 numOfRelations++;
             }
-            
-        }
-        
 
+        }
 
         /// <summary>
         /// Removes the ordered pair (s,t), if it exists
@@ -220,7 +220,6 @@ namespace SpreadsheetUtilities
                 AddDependency(s, newDent);
             }
         }
-
 
         /// <summary>
         /// Removes all existing ordered pairs of the form (r,s).  Then, for each 

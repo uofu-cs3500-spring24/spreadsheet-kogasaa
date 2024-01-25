@@ -5,7 +5,7 @@ Start Date: 22-Jan-2024
 Course: CS 3500, University of Utah, School of Computing
 GitHub ID: kogasaa
 Repo: https://github.com/uofu-cs3500-spring24/spreadsheet-kogasaa.git
-Commit Date: 22-Jan-2024
+Commit Date: 24-Jan-2024
 Project: DependencyGraph
 Copyright: CS 3500 and Bingkun Han - This work may not be copied for use in Academic Coursework.
 
@@ -21,8 +21,6 @@ dent_dee: "C2":{"A1", "C2"}; "B2":{"A1"}
 The reason I chose Dictionary is because dictionary would not allow duplicated key exists, Same as the reason I choose HashSet
 which also prevent duplicated values exist.
 
-
-
 # Assignment Specific Topics
 Implementation of a API.
 Test Driven Development.
@@ -32,5 +30,5 @@ None. I read all the instructions of the assignment, and I think it is not diffi
 
 # Referencing
 CS3500 Assignment Two Duide - https://utah.instructure.com/courses/940768/assignments/13804648
-Microsoft Learning - https://learn.microsoft.com/en-us/visualstudio/get-started/visual-studio-ide?view=vs-2022 (I study the HashSet<T> and Tuple
-classes from the Microsoft Learning)
+Microsoft Learning - https://learn.microsoft.com/en-us/visualstudio/get-started/visual-studio-ide?view=vs-2022 (I study the HashSet<T> and 
+Dictionary classes from the Microsoft Learning)
