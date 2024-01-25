@@ -19,3 +19,4 @@ formula and get right answer from the formla. Futrue extensions are still in prg
 # Time Expenditures:
 	
 	1. Assignment One:     Predicted Hours:  18 hours            Actual Hours:  22 hours
+	2. Assignment Two:     Predicted Hours:  14 hours            Actual Hours:  4 hours

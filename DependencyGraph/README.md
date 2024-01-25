@@ -10,16 +10,17 @@ Project: DependencyGraph
 Copyright: CS 3500 and Bingkun Han - This work may not be copied for use in Academic Coursework.
 
 # Comments to Evaluators
-This is the implementation of the DepeandencyGraph API. The data structure I chose is the hashset and tuple. I use hashset to 
-store all the dependency relationships in the graph. 
+This is the implementation of the DepeandencyGraph API. The data structures I chose are dictionary and hashset. I create two 
+Dictionaries - dee_dentGroup and dent_deeGroup. dee_dent means dependee is the key, hashset of dependents is value; dent_dee 
+means dependent is the value, hash set of dependees is value
 
-Tuple is to store a dependee and a dependent in a relationship. For example, ("A1", "A2") is a relation presented by tuple. The
-first item - A1, is dependee of the second item - A2.
+For example if I want to add relation - ("A1", "B2"), ("A1", "C2"), ("B2", "C2")
+dee_dent: "A1":{"B2", "C2"}; "B2":{"C2"}
+dent_dee: "C2":{"A1", "C2"}; "B2":{"A1"}
 
-HashSet is to store the relationships. It contains the specific tuples without duplication.
+The reason I chose Dictionary is because dictionary would not allow duplicated key exists, Same as the reason I choose HashSet
+which also prevent duplicated values exist.
 
-The reason I choose tuple is because I think tuple is really easy to understand, and it has simple structure so the complixty is also low.
-Why I choose HashSet is because HashSet does not allow the duplicated relations exists and has low complexity.
 
 
 # Assignment Specific Topics

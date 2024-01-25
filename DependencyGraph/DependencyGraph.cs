@@ -80,7 +80,17 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            get { return dent_deeGroup[s].Count; }
+            get 
+            {
+                if (!dent_deeGroup.ContainsKey(s))
+                {
+                    return 0;
+                }
+                else
+                {
+                    return dent_deeGroup[s].Count;
+                }
+            }
         }
 
 

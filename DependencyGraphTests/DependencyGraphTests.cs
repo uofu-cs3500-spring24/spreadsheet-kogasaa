@@ -218,5 +218,89 @@ namespace DependencyGraphTests
                 HashSet<string>(t.GetDependees(letters[i]))));
             }
         }
+
+        /// <summary>
+        ///Using lots of data to test get method
+        ///</summary>
+        [TestMethod()]
+        public void GetTest()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            for(int i = 0; i < 1000; i++)
+            {
+                graph.AddDependency($"{i}", "1002");
+            }
+            for(int i = 0; i < 200; i++)
+            {
+                graph.RemoveDependency(""+i*5, "1002");
+            }
+            Assert.AreEqual(800, graph["1002"]);
+            for(int i = 0;i < 1000; i++)
+            {
+                Assert.AreEqual(0, graph[""+i]);
+            }
+            graph.ReplaceDependees("1002", new HashSet<string>());
+            Assert.AreEqual(0, graph["1002"]);
+        }
+
+        /// <summary>
+        /// Test all Branches of the hasDependees and hasDependents methods
+        /// </summary>
+        [TestMethod()]
+        public void HasTest()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            Assert.IsFalse(graph.HasDependents("1"));
+            Assert.IsFalse(graph.HasDependees("1"));
+            graph.AddDependency("1","2");
+            graph.AddDependency("0","1");
+            Assert.IsTrue(graph.HasDependents("1"));
+            Assert.IsTrue(graph.HasDependees("1"));
+            graph.ReplaceDependees("1", new HashSet<string>());
+            graph.ReplaceDependents("1", new HashSet<string>());
+            Assert.IsFalse(graph.HasDependents("1"));
+            Assert.IsFalse(graph.HasDependees("1"));
+        }
+
+        /// <summary>
+        /// Test all branches of the Removing Mthods
+        /// </summary>
+        [TestMethod()]
+        public void testRemoving()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            for (int i = 0; i < 1000; i++)
+            {
+                graph.AddDependency($"{i}", "1002");
+            }
+            int numOfDeesBefore = graph["1002"];
+            for (int i = 0; i < 1000; i++)
+            {
+                graph.RemoveDependency("1002", $"{i}");
+            }
+            Assert.AreEqual(graph["1002"], numOfDeesBefore);
+            for (int i = 0; i < 100; i++)
+            {
+                graph.RemoveDependency("" + i * 10, "1002");
+            }
+            int numOfDeesBefore2 = graph["2"];
+            graph.RemoveDependency("1", "2");
+            Assert.AreEqual(graph["2"], numOfDeesBefore2);
+        }
+
+        /// <summary>
+        /// Test replace dependees when a cell does not has dependees
+        /// </summary>
+        [TestMethod()]
+        public void testReplacing()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            int BeforeNumOfDee = graph["1"];
+            HashSet<string> newDees = new HashSet<string> { "0", "-1", "-3"};
+            graph.ReplaceDependees("1", newDees);
+            int AfterNumOfDee = graph["1"];
+            Assert.IsFalse(BeforeNumOfDee == AfterNumOfDee);
+            Assert.AreEqual(3, AfterNumOfDee);
+        }
     }
 }
