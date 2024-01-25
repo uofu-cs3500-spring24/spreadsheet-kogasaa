@@ -195,7 +195,7 @@ namespace SpreadsheetUtilities
         {
             if (!dee_dentGroup.ContainsKey(s))
             {
-                return;
+                dee_dentGroup.Add(s, new HashSet<string>());
             }
             foreach (string oldDent in dee_dentGroup[s])
             {
@@ -215,9 +215,9 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
-            if (dent_deeGroup.ContainsKey(s))
+            if (!dent_deeGroup.ContainsKey(s))
             {
-                return;
+                dent_deeGroup.Add(s, new HashSet<string>());
             }
             foreach (string oldDee in dent_deeGroup[s])
             {
