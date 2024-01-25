@@ -20,4 +20,7 @@ between deifferent cells. Futrue extensions are still in prgress.
 # Time Expenditures:
 	
 	1. Assignment One:     Predicted Hours:  18 hours            Actual Hours:  22 hours
-	2. Assignment Two:     Predicted Hours:  10 hours            Actual Hours:  5 hours
+	2. Assignment Two:     Predicted Hours:  10 hours            Actual Hours:  5 hours(coding) +        NOTE:
+																				1 hour (learning) +      Coding is faster than I thought
+																				2 hours(debugging)       TTD improve my implementation 
+																				                         Time
