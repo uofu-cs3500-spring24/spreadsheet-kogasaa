@@ -88,7 +88,7 @@ namespace FormulaEvaluator
                 else if (token == ")")
                 {
                     AddMinusHelper(values, operators);
-                    if (operators.Peek() == "(")
+                    if (operators.Count > 0 && operators.Peek() == "(")
                     {
                         operators.Pop();
                         if (values.Count > 1)
