@@ -104,7 +104,7 @@ namespace SpreadsheetUtilities
         {
             for(int i = 0; i < formulaTokens.Count; i++)
             {
-                if (!(Regex.IsMatch(formulaTokens[i], @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[()+*/-]$")))
+                if (!(Regex.IsMatch(formulaTokens[i], @"^[0-9]+$|^[()+*/-]$")))
                 {
                     string newFormatVariable = formulaTokens[i];
                     try
@@ -132,6 +132,10 @@ namespace SpreadsheetUtilities
         private bool CheckFormat()
         {
             bool oneTokenRule = formulaTokens.Count > 0;
+            if (!oneTokenRule) 
+            {
+                 return false;
+            }
             bool endTokenRule = Regex.IsMatch(formulaTokens.Last(), @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[)]$");
             bool startTokenRule = Regex.IsMatch(formulaTokens.First(), @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[(]$");
             int numOfRightParentheses = 0;
@@ -148,29 +152,22 @@ namespace SpreadsheetUtilities
             }
             bool balanceParenRule = numOfLeftParentheses == numOfRightParentheses;
             bool followRule = true;
-            for(int i = 0; i < formulaTokens.Count-1; i++)
+            for(int i = 1; i < formulaTokens.Count; i++)
             {
-                if (Regex.IsMatch(formulaTokens[i+1], @"^[(+*/-]$"))
+                if (Regex.IsMatch(formulaTokens[i-1], @"^[(+*/-]$"))
                 {
-                    if (!(Regex.IsMatch(formulaTokens[i], @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$")))
+                    if (!(Regex.IsMatch(formulaTokens[i], @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[(]$")))
                     {
                         followRule = false; break;
                     }
                 }
             }
             bool extraFollowRule = true;
-            for (int i = 0; i < formulaTokens.Count - 1; i++)
+            for (int i = 1; i < formulaTokens.Count; i++)
             {
-                if (Regex.IsMatch(formulaTokens[i + 1], @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$"))
+                if (Regex.IsMatch(formulaTokens[i - 1], @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[)]$"))
                 {
-                    if (!(Regex.IsMatch(formulaTokens[i], @"^[+*/-]$")))
-                    {
-                        extraFollowRule = false; break;
-                    }
-                }
-                if (formulaTokens[i+1] == ")")
-                {
-                    if (formulaTokens[i+1] != ")")
+                    if (!(Regex.IsMatch(formulaTokens[i], @"^[)+*/-]$")))
                     {
                         extraFollowRule = false; break;
                     }
@@ -317,10 +314,14 @@ namespace SpreadsheetUtilities
                     double result = double.Parse(values.Pop()) / passedValue;
                     operators.Pop();
                     values.Push(result.ToString());
+                    if(result == double.PositiveInfinity || result == double.NegativeInfinity)
+                    {
+                        throw new ArgumentException();
+                    }
                 }
                 catch
                 {
-                    throw new ArgumentException("The value stack is empty or divided by 0 happened");
+                    throw new ArgumentException("Divide by 0 happend!");
                 }
             }
             else
@@ -393,7 +394,14 @@ namespace SpreadsheetUtilities
         /// </summary>
         public object Evaluate(Func<string, double> lookup)
         {
-            return EvaluateHelper(formulaTokens, lookup);
+            try
+            {
+                return EvaluateHelper(formulaTokens, lookup);
+            }catch (ArgumentException e) 
+            {
+                return new FormulaError(e.Message);
+            }
+            
         }
 
         /// <summary>

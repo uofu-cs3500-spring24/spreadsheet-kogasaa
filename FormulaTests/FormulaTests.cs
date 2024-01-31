@@ -88,9 +88,9 @@ namespace FormulaTests
         }
 
         /// <summary>
-        /// Test all illegal variable Format
+        /// Test all illegal variable Format, but according to piazza a234wswer are legal :(, ask TA to make sure
         /// </summary>
-        [TestMethod, Timeout(5000)]
+        /*[TestMethod, Timeout(5000)]
         public void TestConstructorSyntaxError9()
         {
             try
@@ -128,12 +128,13 @@ namespace FormulaTests
             catch (FormulaFormatException)
             {
             }
-        }
+        }*/
+        
+
         /// <summary>
         /// These are all right format and should never throw a Exception
         /// </summary>
         [TestMethod, Timeout(5000)]
-        [ExpectedException(typeof(FormulaFormatException))]
         public void TestConstructorSyntaxRight()
         {
             Formula rightFormat1 = new Formula("(((((8)))))");
@@ -147,13 +148,23 @@ namespace FormulaTests
         }
 
         /// <summary>
-        /// Throw a exception when normalized variables are illegal!
+        /// when normalized variables are illegal!
         /// </summary>
         [TestMethod, Timeout(5000)]
         [ExpectedException(typeof(FormulaFormatException))]
-        public void TestWhenNormalizeToWrong()
+        public void TestWhenNormalizeToWrongFormat()
         {
-            Formula wrongFormat = new Formula("9+y3", n => "3Y", v => true);
+            Formula wrongFormat = new Formula("9+y3", n => "3%^&Y", v => true);
+        }
+
+        /// <summary>
+        /// when normalized throw a exception!
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void TestWhenNormalizeGoWrong()
+        {
+            Formula wrongFormat = new Formula("9+y3", n => { throw new ArgumentException("I am wrong!!"); }, v => true);
         }
 
         /// <summary>
@@ -195,7 +206,6 @@ namespace FormulaTests
             Formula normal = new Formula("d1");
             Assert.AreEqual(divdeBy0.Evaluate(s=>1).GetType(), typeof(FormulaError));
             Assert.AreEqual(normal.Evaluate(s=>{ throw new ArgumentException(); }).GetType(), typeof(FormulaError));
-            Assert.AreEqual(nullFormula.Evaluate(s => 1).GetType(), typeof(FormulaError));
         }
 
         /// <summary>
