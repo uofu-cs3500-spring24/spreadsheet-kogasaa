@@ -23,4 +23,4 @@ between deifferent cells. Futrue extensions are still in prgress.
 	2. Assignment Two:     Predicted Hours:  10 hours            Actual Hours:  5 hours(coding) + 1 hour (learning) + 2 hours(debugging)          
 	NOTE: Coding is faster than I thought TTD improve my implementation Time
 
-	3. Assignment Three:     Predicted Hours:  14 hours(5h for implementaion + 9h for debugging)            Actual Hours:  
+	3. Assignment Three:     Predicted Hours:  14 hours(5h for implementaion + 9h for debugging)            Actual Hours:  3h for writing the tests + 4h for implementaiton and debuging
