@@ -1,4 +1,6 @@
+
 using SpreadsheetUtilities;
+using System.Runtime.CompilerServices;
 
 namespace FormulaTests
 {
@@ -183,6 +185,7 @@ namespace FormulaTests
         /// This will test edge cases;
         ///     1. when lookup throws a exception
         ///     2. when there is divide by zero
+        ///     3. when the formula is null
         /// Those cases will all return a Formula Error
         /// </summary>
         [TestMethod, Timeout(5000)]
@@ -190,8 +193,10 @@ namespace FormulaTests
         {
             Formula divdeBy0 = new Formula("8/(1-1)");
             Formula normal = new Formula("d1");
+            Formula nullFormula = new Formula(null);
             Assert.AreEqual(divdeBy0.Evaluate(s=>1).GetType(), typeof(FormulaError));
             Assert.AreEqual(normal.Evaluate(s=>{ throw new ArgumentException(); }).GetType(), typeof(FormulaError));
+            Assert.AreEqual(nullFormula.Evaluate(s => 1).GetType(), typeof(FormulaError));
         }
 
         /// <summary>
@@ -208,6 +213,93 @@ namespace FormulaTests
             
             Assert.AreEqual(formula1.GetVariables(), variables1);
             Assert.AreEqual(formula2.GetVariables(), variables2);
+        }
+
+        /// <summary>
+        /// Test If it will get the right string
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        public void TestToString()
+        {
+            Formula formula1 = new Formula("a1  +A1 +  c3+d4  ");
+            Formula formula2 = new Formula("  a1+A1  +c3+  d4  ", n => n.ToUpper(), v => true);
+            string string1 = "a1+A1+c3+d4";
+            string string2 = "A1+A1+C3+D3";
+
+            Assert.AreEqual(formula1.ToString(), string1);
+            Assert.AreEqual(formula2.ToString(), string2);
+        }
+
+        /// <summary>
+        /// Test Equals Method when is not equals:
+        ///     1. when the obj is not a formula type
+        ///     2. when just not same when normalized
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        public void TestEqualsWhenFalse()
+        {
+            string notAFormula = "I am not a Formula, return false!";
+            Formula formula1 = new Formula("a1+A1+c3+d4");
+            Formula formula2 = new Formula("a1+A1+c3+d4", n => n.ToUpper(), v => true);
+
+            Assert.IsFalse(formula1.Equals(notAFormula));
+            Assert.IsFalse(formula1.Equals(formula2));
+        }
+
+        /// <summary>
+        /// Test Equals Method when equals:
+        /// when same after normalized
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        public void TestEqualsWhenTrue()
+        {
+            Formula formula1 = new Formula("a1+  a1+  c3+d4");
+            Formula formula2 = new Formula("a1+A1  +c3+  D4", n => n.ToLower(), v => true);
+            Assert.IsTrue(formula1.Equals(formula2));
+        }
+
+        /// <summary>
+        /// Test Equals Sign when using "=="
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        public void TestEqualSign()
+        {
+            Formula formula1 = new Formula("a1+  a1+  c3+d4");
+            Formula formula2 = new Formula("a1+A1  +c3+  D4", n => n.ToLower(), v => true);
+            Formula formula3 = new Formula("a1+A1+c3+d4", n => n.ToUpper(), v => true);
+            Formula nullFormula = null;
+            Assert.IsTrue(formula1==formula2);
+            Assert.IsFalse(formula1==formula3);
+            Assert.AreEqual((formula1==nullFormula).GetType(), typeof(FormulaError));
+        }
+
+        /// <summary>
+        /// Test UnEquals Sign when using "!="
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        public void TestUnEqualSign()
+        {
+            Formula formula1 = new Formula("a1+  a1+  c3+d4");
+            Formula formula2 = new Formula("a1+A1  +c3+  D4", n => n.ToLower(), v => true);
+            Formula formula3 = new Formula("a1+A1+c3+d4", n => n.ToUpper(), v => true);
+            Formula nullFormula = null;
+            Assert.IsFalse(formula1 != formula2);
+            Assert.IsTrue(formula1 != formula3);
+            Assert.AreEqual((formula1 != nullFormula).GetType(), typeof(FormulaError));
+        }
+
+        /// <summary>
+        /// Test UnEquals Sign when using "!="
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        public void TestHashCode()
+        {
+            Formula formula1 = new Formula("a1+a1+c3+d4");
+            Formula formula2 = new Formula("a1+A1  +c3+  D4", n => n.ToLower(), v => true);
+            Formula formula3 = new Formula("a1+A1+c3+d4", n => n.ToUpper(), v => true);
+            Formula nullFormula = null;
+            Assert.IsTrue(formula1.GetHashCode() == formula2.GetHashCode());
+            Assert.IsFalse(formula1.GetHashCode() == formula3.GetHashCode());
         }
 
     }
