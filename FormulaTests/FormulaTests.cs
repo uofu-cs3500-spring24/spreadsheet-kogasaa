@@ -193,7 +193,6 @@ namespace FormulaTests
         {
             Formula divdeBy0 = new Formula("8/(1-1)");
             Formula normal = new Formula("d1");
-            Formula nullFormula = new Formula(null);
             Assert.AreEqual(divdeBy0.Evaluate(s=>1).GetType(), typeof(FormulaError));
             Assert.AreEqual(normal.Evaluate(s=>{ throw new ArgumentException(); }).GetType(), typeof(FormulaError));
             Assert.AreEqual(nullFormula.Evaluate(s => 1).GetType(), typeof(FormulaError));
@@ -267,10 +266,8 @@ namespace FormulaTests
             Formula formula1 = new Formula("a1+  a1+  c3+d4");
             Formula formula2 = new Formula("a1+A1  +c3+  D4", n => n.ToLower(), v => true);
             Formula formula3 = new Formula("a1+A1+c3+d4", n => n.ToUpper(), v => true);
-            Formula nullFormula = null;
             Assert.IsTrue(formula1==formula2);
             Assert.IsFalse(formula1==formula3);
-            Assert.AreEqual((formula1==nullFormula).GetType(), typeof(FormulaError));
         }
 
         /// <summary>
@@ -282,10 +279,8 @@ namespace FormulaTests
             Formula formula1 = new Formula("a1+  a1+  c3+d4");
             Formula formula2 = new Formula("a1+A1  +c3+  D4", n => n.ToLower(), v => true);
             Formula formula3 = new Formula("a1+A1+c3+d4", n => n.ToUpper(), v => true);
-            Formula nullFormula = null;
             Assert.IsFalse(formula1 != formula2);
             Assert.IsTrue(formula1 != formula3);
-            Assert.AreEqual((formula1 != nullFormula).GetType(), typeof(FormulaError));
         }
 
         /// <summary>
@@ -297,7 +292,6 @@ namespace FormulaTests
             Formula formula1 = new Formula("a1+a1+c3+d4");
             Formula formula2 = new Formula("a1+A1  +c3+  D4", n => n.ToLower(), v => true);
             Formula formula3 = new Formula("a1+A1+c3+d4", n => n.ToUpper(), v => true);
-            Formula nullFormula = null;
             Assert.IsTrue(formula1.GetHashCode() == formula2.GetHashCode());
             Assert.IsFalse(formula1.GetHashCode() == formula3.GetHashCode());
         }

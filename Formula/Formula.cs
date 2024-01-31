@@ -396,124 +396,144 @@ namespace SpreadsheetUtilities
             return EvaluateHelper(formulaTokens, lookup);
         }
 
-    /// <summary>
-    /// Enumerates the normalized versions of all of the variables that occur in this 
-    /// formula.  No normalization may appear more than once in the enumeration, even 
-    /// if it appears more than once in this Formula.
-    /// 
-    /// For example, if N is a method that converts all the letters in a string to upper case:
-    /// 
-    /// new Formula("x+y*z", N, s => true).GetVariables() should enumerate "X", "Y", and "Z"
-    /// new Formula("x+X*z", N, s => true).GetVariables() should enumerate "X" and "Z".
-    /// new Formula("x+X*z").GetVariables() should enumerate "x", "X", and "z".
-    /// </summary>
-    public IEnumerable<String> GetVariables()
-    {
-      return null;
-    }
-
-    /// <summary>
-    /// Returns a string containing no spaces which, if passed to the Formula
-    /// constructor, will produce a Formula f such that this.Equals(f).  All of the
-    /// variables in the string should be normalized.
-    /// 
-    /// For example, if N is a method that converts all the letters in a string to upper case:
-    /// 
-    /// new Formula("x + y", N, s => true).ToString() should return "X+Y"
-    /// new Formula("x + Y").ToString() should return "x+Y"
-    /// </summary>
-    public override string ToString()
-    {
-      return null;
-    }
-
-    /// <summary>
-    ///  <change> make object nullable </change>
-    ///
-    /// If obj is null or obj is not a Formula, returns false.  Otherwise, reports
-    /// whether or not this Formula and obj are equal.
-    /// 
-    /// Two Formulae are considered equal if they consist of the same tokens in the
-    /// same order.  To determine token equality, all tokens are compared as strings 
-    /// except for numeric tokens and variable tokens.
-    /// Numeric tokens are considered equal if they are equal after being "normalized" 
-    /// by C#'s standard conversion from string to double, then back to string. This 
-    /// eliminates any inconsistencies due to limited floating point precision.
-    /// Variable tokens are considered equal if their normalized forms are equal, as 
-    /// defined by the provided normalizer.
-    /// 
-    /// For example, if N is a method that converts all the letters in a string to upper case:
-    ///  
-    /// new Formula("x1+y2", N, s => true).Equals(new Formula("X1  +  Y2")) is true
-    /// new Formula("x1+y2").Equals(new Formula("X1+Y2")) is false
-    /// new Formula("x1+y2").Equals(new Formula("y2+x1")) is false
-    /// new Formula("2.0 + x7").Equals(new Formula("2.000 + x7")) is true
-    /// </summary>
-    public override bool Equals(object? obj)
-    {
-      return false;
-    }
-
-    /// <summary>
-    ///   <change> We are now using Non-Nullable objects.  Thus neither f1 nor f2 can be null!</change>
-    /// Reports whether f1 == f2, using the notion of equality from the Equals method.
-    /// 
-    /// </summary>
-    public static bool operator ==(Formula f1, Formula f2)
-    {
-      return false;
-    }
-
-    /// <summary>
-    ///   <change> We are now using Non-Nullable objects.  Thus neither f1 nor f2 can be null!</change>
-    ///   <change> Note: != should almost always be not ==, if you get my meaning </change>
-    ///   Reports whether f1 != f2, using the notion of equality from the Equals method.
-    /// </summary>
-    public static bool operator !=(Formula f1, Formula f2)
-    {
-      return false;
-    }
-
-    /// <summary>
-    /// Returns a hash code for this Formula.  If f1.Equals(f2), then it must be the
-    /// case that f1.GetHashCode() == f2.GetHashCode().  Ideally, the probability that two 
-    /// randomly-generated unequal Formulae have the same hash code should be extremely small.
-    /// </summary>
-    public override int GetHashCode()
-    {
-      return 0;
-    }
-
-    /// <summary>
-    /// Given an expression, enumerates the tokens that compose it.  Tokens are left paren;
-    /// right paren; one of the four operator symbols; a string consisting of a letter or underscore
-    /// followed by zero or more letters, digits, or underscores; a double literal; and anything that doesn't
-    /// match one of those patterns.  There are no empty tokens, and no token contains white space.
-    /// </summary>
-    private static IEnumerable<string> GetTokens(String formula)
-    {
-      // Patterns for individual tokens
-      String lpPattern = @"\(";
-      String rpPattern = @"\)";
-      String opPattern = @"[\+\-*/]";
-      String varPattern = @"[a-zA-Z_](?: [a-zA-Z_]|\d)*";
-      String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
-      String spacePattern = @"\s+";
-
-      // Overall pattern
-      String pattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
-                                      lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
-
-      // Enumerate matching tokens that don't consist solely of white space.
-      foreach (String s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
-      {
-        if (!Regex.IsMatch(s, @"^\s*$", RegexOptions.Singleline))
+        /// <summary>
+        /// Enumerates the normalized versions of all of the variables that occur in this 
+        /// formula.  No normalization may appear more than once in the enumeration, even 
+        /// if it appears more than once in this Formula.
+        /// 
+        /// For example, if N is a method that converts all the letters in a string to upper case:
+        /// 
+        /// new Formula("x+y*z", N, s => true).GetVariables() should enumerate "X", "Y", and "Z"
+        /// new Formula("x+X*z", N, s => true).GetVariables() should enumerate "X" and "Z".
+        /// new Formula("x+X*z").GetVariables() should enumerate "x", "X", and "z".
+        /// </summary>
+        public IEnumerable<String> GetVariables()
         {
-          yield return s;
+            HashSet<String> variables = new HashSet<String>();
+            foreach (string token in formulaTokens)
+            {
+                if(Regex.IsMatch(token, @"^[a-zA-Z_][0-9a-zA-Z_]+"))
+                {
+                    variables.Add(token);
+                }
+            }
+            return variables;
         }
-      }
 
-    }
+        /// <summary>
+        /// Returns a string containing no spaces which, if passed to the Formula
+        /// constructor, will produce a Formula f such that this.Equals(f).  All of the
+        /// variables in the string should be normalized.
+        /// 
+        /// For example, if N is a method that converts all the letters in a string to upper case:
+        /// 
+        /// new Formula("x + y", N, s => true).ToString() should return "X+Y"
+        /// new Formula("x + Y").ToString() should return "x+Y"
+        /// </summary>
+        public override string ToString()
+        {
+            string stringExpression = "";
+            foreach (string token in formulaTokens)
+            {
+                stringExpression += token;
+            }
+            return stringExpression;
+        }
+
+        /// <summary>
+        ///  <change> make object nullable </change>
+        ///
+        /// If obj is null or obj is not a Formula, returns false.  Otherwise, reports
+        /// whether or not this Formula and obj are equal.
+        /// 
+        /// Two Formulae are considered equal if they consist of the same tokens in the
+        /// same order.  To determine token equality, all tokens are compared as strings 
+        /// except for numeric tokens and variable tokens.
+        /// Numeric tokens are considered equal if they are equal after being "normalized" 
+        /// by C#'s standard conversion from string to double, then back to string. This 
+        /// eliminates any inconsistencies due to limited floating point precision.
+        /// Variable tokens are considered equal if their normalized forms are equal, as 
+        /// defined by the provided normalizer.
+        /// 
+        /// For example, if N is a method that converts all the letters in a string to upper case:
+        ///  
+        /// new Formula("x1+y2", N, s => true).Equals(new Formula("X1  +  Y2")) is true
+        /// new Formula("x1+y2").Equals(new Formula("X1+Y2")) is false
+        /// new Formula("x1+y2").Equals(new Formula("y2+x1")) is false
+        /// new Formula("2.0 + x7").Equals(new Formula("2.000 + x7")) is true
+        /// </summary>
+        public override bool Equals(object? obj)
+        {
+            if(obj is Formula)
+            {
+                return this.ToString() == ((Formula)obj).ToString();
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        ///   <change> We are now using Non-Nullable objects.  Thus neither f1 nor f2 can be null!</change>
+        /// Reports whether f1 == f2, using the notion of equality from the Equals method.
+        /// 
+        /// </summary>
+        public static bool operator ==(Formula f1, Formula f2)
+        {
+            return f1.Equals(f2);
+        }
+
+        /// <summary>
+        ///   <change> We are now using Non-Nullable objects.  Thus neither f1 nor f2 can be null!</change>
+        ///   <change> Note: != should almost always be not ==, if you get my meaning </change>
+        ///   Reports whether f1 != f2, using the notion of equality from the Equals method.
+        /// </summary>
+        public static bool operator !=(Formula f1, Formula f2)
+        {
+            return !f1.Equals(f2);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this Formula.  If f1.Equals(f2), then it must be the
+        /// case that f1.GetHashCode() == f2.GetHashCode().  Ideally, the probability that two 
+        /// randomly-generated unequal Formulae have the same hash code should be extremely small.
+        /// </summary>
+        public override int GetHashCode()
+        {
+            return this.ToString().GetHashCode();
+        }
+
+        /// <summary>
+        /// Given an expression, enumerates the tokens that compose it.  Tokens are left paren;
+        /// right paren; one of the four operator symbols; a string consisting of a letter or underscore
+        /// followed by zero or more letters, digits, or underscores; a double literal; and anything that doesn't
+        /// match one of those patterns.  There are no empty tokens, and no token contains white space.
+        /// </summary>
+        private static IEnumerable<string> GetTokens(String formula)
+        {
+          // Patterns for individual tokens
+          String lpPattern = @"\(";
+          String rpPattern = @"\)";
+          String opPattern = @"[\+\-*/]";
+          String varPattern = @"[a-zA-Z_](?: [a-zA-Z_]|\d)*";
+          String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
+          String spacePattern = @"\s+";
+
+          // Overall pattern
+          String pattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
+                                          lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
+
+          // Enumerate matching tokens that don't consist solely of white space.
+          foreach (String s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
+          {
+            if (!Regex.IsMatch(s, @"^\s*$", RegexOptions.Singleline))
+            {
+              yield return s;
+            }
+          }
+
+        }
   }
 
   /// <summary>
