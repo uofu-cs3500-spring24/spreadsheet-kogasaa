@@ -188,7 +188,7 @@ namespace FormulaTests
             Assert.AreEqual(20009, result1);
 
             Formula formula2 = new Formula("9+y3+Y3");
-            double result2 = (double)formula1.Evaluate(a => { if (a == "y3") { return 1000; } else { return 10000; } });
+            double result2 = (double)formula2.Evaluate(a => { if (a == "y3") { return 1000; } else { return 10000; } });
             Assert.AreEqual(11009, result2 );
         }
 
@@ -220,8 +220,8 @@ namespace FormulaTests
             HashSet<string> variables1 = new HashSet<string> {"a1", "A1", "c3", "d4"};
             HashSet<string> variables2 = new HashSet<string> {"A1", "C3", "D4"};
             
-            Assert.AreEqual(formula1.GetVariables(), variables1);
-            Assert.AreEqual(formula2.GetVariables(), variables2);
+            Assert.IsTrue(formula1.GetVariables().ToHashSet().SetEquals(variables1));
+            Assert.IsTrue(formula2.GetVariables().ToHashSet().SetEquals(variables2));
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace FormulaTests
             Formula formula1 = new Formula("a1  +A1 +  c3+d4  ");
             Formula formula2 = new Formula("  a1+A1  +c3+  d4  ", n => n.ToUpper(), v => true);
             string string1 = "a1+A1+c3+d4";
-            string string2 = "A1+A1+C3+D3";
+            string string2 = "A1+A1+C3+D4";
 
             Assert.AreEqual(formula1.ToString(), string1);
             Assert.AreEqual(formula2.ToString(), string2);
