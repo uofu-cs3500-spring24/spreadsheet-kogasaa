@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -45,70 +46,355 @@ namespace SpreadsheetUtilities
   /// </summary>
   public class Formula
   {
-    /// <summary>
-    /// Creates a Formula from a string that consists of an infix expression written as
-    /// described in the class comment.  If the expression is syntactically invalid,
-    /// throws a FormulaFormatException with an explanatory Message.
-    /// 
-    /// The associated normalizer is the identity function, and the associated validator
-    /// maps every string to true.  
-    /// </summary>
-    public Formula(String formula) :
+
+        private List<string> formulaTokens;
+        private Func<string, string> nomalizor;
+        private Func<string, bool> validor;
+
+
+        
+        /// <summary>
+        /// Creates a Formula from a string that consists of an infix expression written as
+        /// described in the class comment.  If the expression is syntactically invalid,
+        /// throws a FormulaFormatException with an explanatory Message.
+        /// 
+        /// The associated normalizer is the identity function, and the associated validator
+        /// maps every string to true.  
+        /// </summary>
+        public Formula(String formula) :
         this(formula, s => s, s => true)
-    {
-    }
+        {
+        }
 
-    /// <summary>
-    /// Creates a Formula from a string that consists of an infix expression written as
-    /// described in the class comment.  If the expression is syntactically incorrect,
-    /// throws a FormulaFormatException with an explanatory Message.
-    /// 
-    /// The associated normalizer and validator are the second and third parameters,
-    /// respectively.  
-    /// 
-    /// If the formula contains a variable v such that normalize(v) is not a legal variable, 
-    /// throws a FormulaFormatException with an explanatory message. 
-    /// 
-    /// If the formula contains a variable v such that isValid(normalize(v)) is false,
-    /// throws a FormulaFormatException with an explanatory message.
-    /// 
-    /// Suppose that N is a method that converts all the letters in a string to upper case, and
-    /// that V is a method that returns true only if a string consists of one letter followed
-    /// by one digit.  Then:
-    /// 
-    /// new Formula("x2+y3", N, V) should succeed
-    /// new Formula("x+y3", N, V) should throw an exception, since V(N("x")) is false
-    /// new Formula("2x+y3", N, V) should throw an exception, since "2x+y3" is syntactically incorrect.
-    /// </summary>
-    public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
-    {
-    }
+        /// <summary>
+        /// Creates a Formula from a string that consists of an infix expression written as
+        /// described in the class comment.  If the expression is syntactically incorrect,
+        /// throws a FormulaFormatException with an explanatory Message.
+        /// 
+        /// The associated normalizer and validator are the second and third parameters,
+        /// respectively.  
+        /// 
+        /// If the formula contains a variable v such that normalize(v) is not a legal variable, 
+        /// throws a FormulaFormatException with an explanatory message. 
+        /// 
+        /// If the formula contains a variable v such that isValid(normalize(v)) is false,
+        /// throws a FormulaFormatException with an explanatory message.
+        /// 
+        /// Suppose that N is a method that converts all the letters in a string to upper case, and
+        /// that V is a method that returns true only if a string consists of one letter followed
+        /// by one digit.  Then:
+        /// 
+        /// new Formula("x2+y3", N, V) should succeed
+        /// new Formula("x+y3", N, V) should throw an exception, since V(N("x")) is false
+        /// new Formula("2x+y3", N, V) should throw an exception, since "2x+y3" is syntactically incorrect.
+        /// </summary>
+        public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
+        {
+            this.formulaTokens = GetTokens(formula).ToList();
+            this.nomalizor = normalize;
+            this.validor = isValid;
+            NormalizeFormulaVariabels();
+            if (!CheckFormat())
+            {
+                throw new FormulaFormatException("the variable are all correct, but the format of formula - " + formula + " - is wrong!");
+            }
+        }
 
-    /// <summary>
-    /// Evaluates this Formula, using the lookup delegate to determine the values of
-    /// variables.  When a variable symbol v needs to be determined, it should be looked up
-    /// via lookup(normalize(v)). (Here, normalize is the normalizer that was passed to 
-    /// the constructor.)
-    /// 
-    /// For example, if L("x") is 2, L("X") is 4, and N is a method that converts all the letters 
-    /// in a string to upper case:
-    /// 
-    /// new Formula("x+7", N, s => true).Evaluate(L) is 11
-    /// new Formula("x+7").Evaluate(L) is 9
-    /// 
-    /// Given a variable symbol as its parameter, lookup returns the variable's value 
-    /// (if it has one) or throws an ArgumentException (otherwise).
-    /// 
-    /// If no undefined variables or divisions by zero are encountered when evaluating 
-    /// this Formula, the value is returned.  Otherwise, a FormulaError is returned.  
-    /// The Reason property of the FormulaError should have a meaningful explanation.
-    ///
-    /// This method should never throw an exception.
-    /// </summary>
-    public object Evaluate(Func<string, double> lookup)
-    {
-      return null;
-    }
+        private void NormalizeFormulaVariabels()
+        {
+            for(int i = 0; i < formulaTokens.Count; i++)
+            {
+                if (!(Regex.IsMatch(formulaTokens[i], @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[()+*/-]$")))
+                {
+                    string newFormatVariable = formulaTokens[i];
+                    try
+                    {
+                        newFormatVariable = nomalizor(newFormatVariable);
+
+                    }
+                    catch
+                    {
+                        throw new FormulaFormatException("the variable: " + formulaTokens[i] + " - cannot pass the nomalizor");
+                    }
+                    
+                    if (validor(newFormatVariable))
+                    {
+                        formulaTokens[i] = newFormatVariable;
+                    }
+                    else
+                    {
+                        throw new FormulaFormatException("the orignal variable " + formulaTokens[i] + " is normalized to " + newFormatVariable +" but cannot pass the validor");
+                    }
+                }
+            }
+        }
+
+        private bool CheckFormat()
+        {
+            bool oneTokenRule = formulaTokens.Count > 0;
+            bool endTokenRule = Regex.IsMatch(formulaTokens.Last(), @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[)]$");
+            bool startTokenRule = Regex.IsMatch(formulaTokens.First(), @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[(]$");
+            int numOfRightParentheses = 0;
+            int numOfLeftParentheses = 0;
+            bool specificTokenRule = true;
+            foreach(string token in formulaTokens)
+            {
+                if(token == "(")
+                    numOfLeftParentheses++;
+                if(token == ")")
+                    numOfRightParentheses++;
+                if(!(Regex.IsMatch(token, @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[()+*/-]$")))
+                    specificTokenRule = false;
+            }
+            bool balanceParenRule = numOfLeftParentheses == numOfRightParentheses;
+            bool followRule = true;
+            for(int i = 0; i < formulaTokens.Count-1; i++)
+            {
+                if (Regex.IsMatch(formulaTokens[i+1], @"^[(+*/-]$"))
+                {
+                    if (!(Regex.IsMatch(formulaTokens[i], @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$")))
+                    {
+                        followRule = false; break;
+                    }
+                }
+            }
+            bool extraFollowRule = true;
+            for (int i = 0; i < formulaTokens.Count - 1; i++)
+            {
+                if (Regex.IsMatch(formulaTokens[i + 1], @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$"))
+                {
+                    if (!(Regex.IsMatch(formulaTokens[i], @"^[+*/-]$")))
+                    {
+                        extraFollowRule = false; break;
+                    }
+                }
+                if (formulaTokens[i+1] == ")")
+                {
+                    if (formulaTokens[i+1] != ")")
+                    {
+                        extraFollowRule = false; break;
+                    }
+                }
+            }
+
+            return specificTokenRule && oneTokenRule && balanceParenRule && startTokenRule && endTokenRule && followRule && extraFollowRule;
+
+        }
+
+        /// <summary>
+        /// This method will pass a list of tokens of a formula like {"9","*","9"} and a function to
+        /// change a string(variable) to a sepecific integer values. It will used when there is 
+        /// string variable exist in the formula. This method will calculate the formula as tokens
+        /// and return a double type calculate result
+        /// </summary>
+        /// <param name="formulaTokens">the list of tokens of the formula</param>
+        /// <param name="variableEvaluator">the function to convert string varible into a integer</param>
+        /// <returns> double result, the result of the expression</returns>
+        /// <exception cref="ArgumentException">
+        /// 1. when find a ")" but cannot find a "("
+        /// 2. when the evaluator cannot find a integer to replace variable by using variableEvaluator
+        /// 3. when the end format is wrong (the stack situation when after going over all tokens in expression)
+        ///     which also showed the expression has wrong format such as "1++", "1()3".
+        /// </exception>
+        private static double EvaluateHelper(List<string> formulaTokens, Func<string, double> variableEvaluator)
+        {
+            // I learnt how to use generic stack class from microsoft learning webpage
+            Stack<String> values = new Stack<String>();
+            Stack<String> operators = new Stack<String>();
+            foreach (String token in formulaTokens)
+            {
+                if (double.TryParse(token, out double tokenDoubleValue))
+                {
+                    if (operators.Count > 0)
+                    {
+                        DivideMultipleHelper(values, operators, tokenDoubleValue);
+                    }
+                    else
+                    {
+                        values.Push(token);
+                    }
+                }
+                else if (token == "+" || token == "-")
+                {
+                    if (operators.Count > 0)
+                    {
+                        AddMinusHelper(values, operators);
+                    }
+                    operators.Push(token);
+
+                }
+                else if (token == "*" || token == "/" || token == "(")
+                {
+                    operators.Push(token);
+                }
+                else if (token == ")")
+                {
+                    AddMinusHelper(values, operators);
+                    if (operators.Count > 0 && operators.Peek() == "(")
+                    {
+                        operators.Pop();
+                        if (values.Count > 1)
+                        {
+                            DivideMultipleHelper(values, operators, double.Parse(values.Pop()));
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("missing a (");
+                    }
+                }
+                else
+                {
+                    if (token != "" && token != " ")
+                    {
+                        try
+                        {
+                           
+                            double lookedValue = variableEvaluator(token);
+                            if (operators.Count > 0)
+                            {
+                                DivideMultipleHelper(values, operators, lookedValue);
+                            }
+                            else
+                            {
+                                values.Push(lookedValue.ToString());
+                            }
+                        }
+                        catch
+                        {
+                            throw new ArgumentException("Unknown Variable exist: " + token);
+                        }
+                    }
+                }
+            }
+            if (values.Count == 1 && operators.Count == 0)
+            {
+                double finalResult = double.Parse(values.Pop());
+                return finalResult;
+            }
+            else if (values.Count == 2 && operators.Count == 1)
+            {
+                AddMinusHelper(values, operators);
+                double finalResult = double.Parse(values.Pop());
+                return finalResult;
+            }
+            else
+            {
+                throw new ArgumentException("the this formula has wrong format");
+            }
+        }
+
+        /// <summary>
+        /// This is method will do divide or multiply operation by using target value, values stack poped value and 
+        /// operators poped operators. If operators stack's poped operator is "/", it will do valuesPopedValue/pass-
+        /// edValue, or if it is * it will multiply two of them. IF peek operator is neither / or * it will do nothing.
+        /// then it will push the new result value in the values stack
+        /// </summary>
+        /// <param name="values">The values stack used to poped value to calculate</param>
+        /// <param name="operators">The operator stack used to choose the operation </param>
+        /// <param name="passedValue">The value will be use in opration</param>
+        /// <exception cref="ArgumentException"> when value stack has no enough values in it or when the formula
+        /// divide by 0</exception>
+        private static void DivideMultipleHelper(Stack<string> values, Stack<string> operators, double passedValue)
+        {
+            if (operators.Peek() == "*")
+            {
+                try
+                {
+                    double result = passedValue * double.Parse(values.Pop());
+                    operators.Pop();
+                    values.Push(result.ToString());
+                }
+                catch
+                {
+                    throw new ArgumentException("The value stack is empty");
+                }
+            }
+            else if (operators.Peek() == "/")
+            {
+                try
+                {
+                    double result = double.Parse(values.Pop()) / passedValue;
+                    operators.Pop();
+                    values.Push(result.ToString());
+                }
+                catch
+                {
+                    throw new ArgumentException("The value stack is empty or divided by 0 happened");
+                }
+            }
+            else
+            {
+                values.Push(passedValue.ToString());
+            }
+        }
+
+        /// <summary>
+        /// This method will do add and minus operation if the top of the oprator stack is + or -. If the top is either + or -
+        /// It will pop two values from values stack and sum them or substract them depending on the top's command + or -. Then 
+        /// It will push the result value in values stack. If the top of operators is not + or 
+        /// </summary>
+        /// <param name="values">the values stack to pop value to calculate</param>
+        /// <param name="operators">the operators stack to pop operator and do operations</param>
+        /// <exception cref="ArgumentException">When value stack has less than 2 values which do not support the operation</exception>
+        private static void AddMinusHelper(Stack<string> values, Stack<string> operators)
+        {
+            if (operators.Peek() == "+")
+            {
+                try
+                {
+                    double value1 = double.Parse(values.Pop());
+                    double value2 = double.Parse(values.Pop());
+                    values.Push((value1 + value2).ToString());
+                    operators.Pop();
+                }
+                catch
+                {
+                    throw new ArgumentException("the value stack contains fewer than 2 values");
+                }
+            }
+            else if (operators.Peek() == "-")
+            {
+                try
+                {
+                    double value1 = double.Parse(values.Pop());
+                    double value2 = double.Parse(values.Pop());
+                    values.Push((value2 - value1).ToString());
+                    operators.Pop();
+                }
+                catch
+                {
+                    throw new ArgumentException("the value stack contains fewer than 2 values");
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Evaluates this Formula, using the lookup delegate to determine the values of
+        /// variables.  When a variable symbol v needs to be determined, it should be looked up
+        /// via lookup(normalize(v)). (Here, normalize is the normalizer that was passed to 
+        /// the constructor.)
+        /// 
+        /// For example, if L("x") is 2, L("X") is 4, and N is a method that converts all the letters 
+        /// in a string to upper case:
+        /// 
+        /// new Formula("x+7", N, s => true).Evaluate(L) is 11
+        /// new Formula("x+7").Evaluate(L) is 9
+        /// 
+        /// Given a variable symbol as its parameter, lookup returns the variable's value 
+        /// (if it has one) or throws an ArgumentException (otherwise).
+        /// 
+        /// If no undefined variables or divisions by zero are encountered when evaluating 
+        /// this Formula, the value is returned.  Otherwise, a FormulaError is returned.  
+        /// The Reason property of the FormulaError should have a meaningful explanation.
+        ///
+        /// This method should never throw an exception.
+        /// </summary>
+        public object Evaluate(Func<string, double> lookup)
+        {
+            return EvaluateHelper(formulaTokens, lookup);
+        }
 
     /// <summary>
     /// Enumerates the normalized versions of all of the variables that occur in this 
