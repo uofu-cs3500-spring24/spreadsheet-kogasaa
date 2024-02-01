@@ -249,17 +249,10 @@ namespace SpreadsheetUtilities
                 else if (token == ")")
                 {
                     AddMinusHelper(values, operators);
-                    if (operators.Count > 0 && operators.Peek() == "(")
+                    operators.Pop();
+                    if (values.Count > 1)
                     {
-                        operators.Pop();
-                        if (values.Count > 1)
-                        {
-                            DivideMultipleHelper(values, operators, double.Parse(values.Pop()));
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentException("missing a (");
+                        DivideMultipleHelper(values, operators, double.Parse(values.Pop()));
                     }
                 }
                 else
@@ -268,7 +261,6 @@ namespace SpreadsheetUtilities
                     {
                         try
                         {
-                           
                             double lookedValue = variableEvaluator(token);
                             if (operators.Count > 0)
                             {
@@ -281,7 +273,7 @@ namespace SpreadsheetUtilities
                         }
                         catch
                         {
-                            throw new ArgumentException("Unknown Variable exist: " + token);
+                            throw new ArgumentException("Unknown Variable exist: " + token + " or divide by 0 happened");
                         }
                     }
                 }
@@ -291,15 +283,11 @@ namespace SpreadsheetUtilities
                 double finalResult = double.Parse(values.Pop());
                 return finalResult;
             }
-            else if (values.Count == 2 && operators.Count == 1)
+            else
             {
                 AddMinusHelper(values, operators);
                 double finalResult = double.Parse(values.Pop());
                 return finalResult;
-            }
-            else
-            {
-                throw new ArgumentException("the this formula has wrong format");
             }
         }
 
@@ -318,16 +306,9 @@ namespace SpreadsheetUtilities
         {
             if (operators.Peek() == "*")
             {
-                try
-                {
-                    double result = passedValue * double.Parse(values.Pop());
-                    operators.Pop();
-                    values.Push(result.ToString());
-                }
-                catch
-                {
-                    throw new ArgumentException("The value stack is empty");
-                }
+                double result = passedValue * double.Parse(values.Pop());
+                operators.Pop();
+                values.Push(result.ToString());
             }
             else if (operators.Peek() == "/")
             {
@@ -364,31 +345,18 @@ namespace SpreadsheetUtilities
         {
             if (operators.Peek() == "+")
             {
-                try
-                {
-                    double value1 = double.Parse(values.Pop());
-                    double value2 = double.Parse(values.Pop());
-                    values.Push((value1 + value2).ToString());
-                    operators.Pop();
-                }
-                catch
-                {
-                    throw new ArgumentException("the value stack contains fewer than 2 values");
-                }
+                double value1 = double.Parse(values.Pop());
+                double value2 = double.Parse(values.Pop());
+                values.Push((value1 + value2).ToString());
+                operators.Pop();
             }
             else if (operators.Peek() == "-")
             {
-                try
-                {
-                    double value1 = double.Parse(values.Pop());
-                    double value2 = double.Parse(values.Pop());
-                    values.Push((value2 - value1).ToString());
-                    operators.Pop();
-                }
-                catch
-                {
-                    throw new ArgumentException("the value stack contains fewer than 2 values");
-                }
+                
+                double value1 = double.Parse(values.Pop());
+                double value2 = double.Parse(values.Pop());
+                values.Push((value2 - value1).ToString());
+                operators.Pop();
             }
         }
 
