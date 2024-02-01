@@ -90,50 +90,6 @@ namespace FormulaTests
         }
 
         /// <summary>
-        /// Test all illegal variable Format, but according to piazza a234wswer are legal :(, ask TA to make sure
-        /// </summary>
-        /*[TestMethod, Timeout(5000)]
-        public void TestConstructorSyntaxError9()
-        {
-            try
-            {
-                Formula wrongVariable1 = new Formula("ewrw");
-                throw new ArgumentException("Formula Constructor Cannot Find Wrong Format");
-            }
-            catch (FormulaFormatException)
-            {
-            }
-
-            try
-            {
-                Formula wrongVariable1 = new Formula("ewr3423ewrw");
-                throw new ArgumentException("Formula Constructor Cannot Find Wrong Format");
-            }
-            catch (FormulaFormatException)
-            {
-            }
-
-            try
-            {
-                Formula wrongVariable1 = new Formula("3453ewrw");
-                throw new ArgumentException("Formula Constructor Cannot Find Wrong Format");
-            }
-            catch (FormulaFormatException)
-            {
-            }
-
-            try
-            {
-                Formula wrongVariable1 = new Formula("440de9ufwjiojd");
-                throw new ArgumentException("Formula Constructor Cannot Find Wrong Format");
-            }
-            catch (FormulaFormatException)
-            {
-            }
-        }*/
-        
-
-        /// <summary>
         /// These are all right format and should never throw a Exception
         /// </summary>
         [TestMethod, Timeout(5000)]
@@ -148,17 +104,9 @@ namespace FormulaTests
             Formula rightFormat6 = new Formula("qwe_123");
             Formula rightFormat7 = new Formula("qwe_123____33awe_8");
             Formula rightFormat8 = new Formula("____3");
+            Formula rightFormat9 = new Formula("q");
         }
 
-        /// <summary>
-        /// These are all right format and should never throw a Exception
-        /// </summary>
-        [TestMethod, Timeout(5000)]
-        public void TestDoublePattern()
-        {
-            String doublePattern = @"^(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?$";
-            Assert.IsTrue(Regex.IsMatch("4", doublePattern));
-        }
 
         /// <summary>
         /// These are all right format and should never throw a Exception
@@ -172,17 +120,6 @@ namespace FormulaTests
             Assert.IsTrue(Regex.IsMatch("*", opPattern));
             Assert.IsTrue(Regex.IsMatch("/", opPattern));
             Assert.IsFalse(Regex.IsMatch("^", opPattern));
-        }
-
-        /// <summary>
-        /// These are all right format and should never throw a Exception
-        /// </summary>
-        [TestMethod, Timeout(5000)]
-        public void TestVariablePattern()
-        {
-            String varPattern = @"^[a-zA-Z_][a-zA-Z0-9_]+)$";   
-            Assert.IsTrue(Regex.IsMatch("woieruwoeur79273_____aweriqwo238947wr9qrdvr98e____yhc9erqc_343d_c_32", varPattern));
-            Assert.IsFalse(Regex.IsMatch("234u", varPattern));
         }
 
         /// <summary>

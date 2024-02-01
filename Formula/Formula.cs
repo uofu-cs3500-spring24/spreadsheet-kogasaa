@@ -104,8 +104,8 @@ namespace SpreadsheetUtilities
         {
             for(int i = 0; i < formulaTokens.Count; i++)
             {
-                if (!(Regex.IsMatch(formulaTokens[i], @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?") ||
-                      Regex.IsMatch(formulaTokens[i], @"[\+\-*/]") ||
+                if (!(Double.TryParse(formulaTokens[i], out double ignore) ||
+                      Regex.IsMatch(formulaTokens[i], @"^[\+\-*/]$") ||
                       formulaTokens[i] == "(" ||
                       formulaTokens[i] == ")"))
                 {
@@ -135,19 +135,18 @@ namespace SpreadsheetUtilities
         private bool CheckFormat()
         {
             // Patterns for individual tokens, Copied from get token method
-            String opPattern = @"[\+\-*/]";
-            String varPattern = @"[a-zA-Z_](?: [a-zA-Z_]|\d)*";
-            String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
+            String opPattern = @"^[\+\-*/]$";
+            String varPattern = @"^[a-zA-Z_]([0-9a-zA-Z_]+)?$";
 
             bool oneTokenRule = formulaTokens.Count > 0;
             if (!oneTokenRule) 
             {
                  return false;
             }
-            bool endTokenRule = Regex.IsMatch(formulaTokens.Last(), doublePattern) || 
+            bool endTokenRule = Double.TryParse(formulaTokens.Last(), out double ignore1) || 
                                 Regex.IsMatch(formulaTokens.Last(), varPattern)|| 
                                 formulaTokens.Last() == ")";
-            bool startTokenRule = Regex.IsMatch(formulaTokens.First(), doublePattern) ||
+            bool startTokenRule = Double.TryParse(formulaTokens.First(), out double ignore2) ||
                                   Regex.IsMatch(formulaTokens.First(), varPattern) || 
                                   formulaTokens.First() == "(";
             int numOfRightParentheses = 0;
@@ -159,8 +158,8 @@ namespace SpreadsheetUtilities
                     numOfLeftParentheses++;
                 if(token == ")")
                     numOfRightParentheses++;
-                if(!(Regex.IsMatch(token, varPattern)|| 
-                    Regex.IsMatch(token, doublePattern)|| 
+                if(!(Regex.IsMatch(token, varPattern)||
+                    Double.TryParse(token, out double ignore3) || 
                     Regex.IsMatch(token, opPattern)||
                     token=="("||
                     token==")"))
@@ -186,7 +185,7 @@ namespace SpreadsheetUtilities
             bool extraFollowRule = true;
             for (int i = 1; i < formulaTokens.Count; i++)
             {
-                if (Regex.IsMatch(formulaTokens[i - 1], doublePattern)||
+                if (Double.TryParse(formulaTokens[i - 1], out double ignore4) ||
                     Regex.IsMatch(formulaTokens[i - 1], varPattern)||
                     formulaTokens[i - 1] == ")")
                 {
@@ -443,7 +442,7 @@ namespace SpreadsheetUtilities
             HashSet<String> variables = new HashSet<String>();
             foreach (string token in formulaTokens)
             {
-                if(Regex.IsMatch(token, @"^[a-zA-Z_][0-9a-zA-Z_]+"))
+                if(Regex.IsMatch(token, @"^[a-zA-Z_]([0-9a-zA-Z_]+)?$"))
                 {
                     variables.Add(token);
                 }
