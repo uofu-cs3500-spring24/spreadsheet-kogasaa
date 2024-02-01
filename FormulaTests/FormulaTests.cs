@@ -1,6 +1,8 @@
 
 using SpreadsheetUtilities;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace FormulaTests
 {
@@ -137,6 +139,7 @@ namespace FormulaTests
         [TestMethod, Timeout(5000)]
         public void TestConstructorSyntaxRight()
         {
+            Formula rightFormat0 = new Formula("(((((9.00000)))))");
             Formula rightFormat1 = new Formula("(((((8)))))");
             Formula rightFormat2 = new Formula("a1+i2-d1*(2)/2+9-2-2/(((((w3)))))*2");
             Formula rightFormat3 = new Formula("1+22/3*4-2+y2");
@@ -145,6 +148,41 @@ namespace FormulaTests
             Formula rightFormat6 = new Formula("qwe_123");
             Formula rightFormat7 = new Formula("qwe_123____33awe_8");
             Formula rightFormat8 = new Formula("____3");
+        }
+
+        /// <summary>
+        /// These are all right format and should never throw a Exception
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        public void TestDoublePattern()
+        {
+            String doublePattern = @"^(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?$";
+            Assert.IsTrue(Regex.IsMatch("4", doublePattern));
+        }
+
+        /// <summary>
+        /// These are all right format and should never throw a Exception
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        public void TestOperatorPattern()
+        {
+            String opPattern = @"[\+\-*/]";
+            Assert.IsTrue(Regex.IsMatch("-", opPattern));
+            Assert.IsTrue(Regex.IsMatch("+", opPattern));
+            Assert.IsTrue(Regex.IsMatch("*", opPattern));
+            Assert.IsTrue(Regex.IsMatch("/", opPattern));
+            Assert.IsFalse(Regex.IsMatch("^", opPattern));
+        }
+
+        /// <summary>
+        /// These are all right format and should never throw a Exception
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        public void TestVariablePattern()
+        {
+            String varPattern = @"^[a-zA-Z_][a-zA-Z0-9_]+)$";   
+            Assert.IsTrue(Regex.IsMatch("woieruwoeur79273_____aweriqwo238947wr9qrdvr98e____yhc9erqc_343d_c_32", varPattern));
+            Assert.IsFalse(Regex.IsMatch("234u", varPattern));
         }
 
         /// <summary>
@@ -305,6 +343,17 @@ namespace FormulaTests
             Assert.IsTrue(formula1.GetHashCode() == formula2.GetHashCode());
             Assert.IsFalse(formula1.GetHashCode() == formula3.GetHashCode());
         }
+
+        /// <summary>
+        /// Test UnEquals Sign when using "!="
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        public void EvaluatorTest()
+        {
+            
+        }
+
+
 
     }
 }

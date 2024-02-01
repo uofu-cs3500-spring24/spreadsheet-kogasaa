@@ -104,7 +104,10 @@ namespace SpreadsheetUtilities
         {
             for(int i = 0; i < formulaTokens.Count; i++)
             {
-                if (!(Regex.IsMatch(formulaTokens[i], @"^[0-9]+$|^[()+*/-]$")))
+                if (!(Regex.IsMatch(formulaTokens[i], @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?") ||
+                      Regex.IsMatch(formulaTokens[i], @"[\+\-*/]") ||
+                      formulaTokens[i] == "(" ||
+                      formulaTokens[i] == ")"))
                 {
                     string newFormatVariable = formulaTokens[i];
                     try
@@ -131,13 +134,22 @@ namespace SpreadsheetUtilities
 
         private bool CheckFormat()
         {
+            // Patterns for individual tokens, Copied from get token method
+            String opPattern = @"[\+\-*/]";
+            String varPattern = @"[a-zA-Z_](?: [a-zA-Z_]|\d)*";
+            String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
+
             bool oneTokenRule = formulaTokens.Count > 0;
             if (!oneTokenRule) 
             {
                  return false;
             }
-            bool endTokenRule = Regex.IsMatch(formulaTokens.Last(), @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[)]$");
-            bool startTokenRule = Regex.IsMatch(formulaTokens.First(), @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[(]$");
+            bool endTokenRule = Regex.IsMatch(formulaTokens.Last(), doublePattern) || 
+                                Regex.IsMatch(formulaTokens.Last(), varPattern)|| 
+                                formulaTokens.Last() == ")";
+            bool startTokenRule = Regex.IsMatch(formulaTokens.First(), doublePattern) ||
+                                  Regex.IsMatch(formulaTokens.First(), varPattern) || 
+                                  formulaTokens.First() == "(";
             int numOfRightParentheses = 0;
             int numOfLeftParentheses = 0;
             bool specificTokenRule = true;
@@ -147,16 +159,25 @@ namespace SpreadsheetUtilities
                     numOfLeftParentheses++;
                 if(token == ")")
                     numOfRightParentheses++;
-                if(!(Regex.IsMatch(token, @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[()+*/-]$")))
+                if(!(Regex.IsMatch(token, varPattern)|| 
+                    Regex.IsMatch(token, doublePattern)|| 
+                    Regex.IsMatch(token, opPattern)||
+                    token=="("||
+                    token==")"))
                     specificTokenRule = false;
             }
             bool balanceParenRule = numOfLeftParentheses == numOfRightParentheses;
+            if (!(endTokenRule && startTokenRule && balanceParenRule && specificTokenRule))
+            {
+                return false;
+            }
+
             bool followRule = true;
             for(int i = 1; i < formulaTokens.Count; i++)
             {
-                if (Regex.IsMatch(formulaTokens[i-1], @"^[(+*/-]$"))
+                if (Regex.IsMatch(formulaTokens[i-1], opPattern) || formulaTokens[i-1] == "(")
                 {
-                    if (!(Regex.IsMatch(formulaTokens[i], @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[(]$")))
+                    if (Regex.IsMatch(formulaTokens[i], opPattern))
                     {
                         followRule = false; break;
                     }
@@ -165,16 +186,18 @@ namespace SpreadsheetUtilities
             bool extraFollowRule = true;
             for (int i = 1; i < formulaTokens.Count; i++)
             {
-                if (Regex.IsMatch(formulaTokens[i - 1], @"^[a-zA-Z_][0-9a-zA-Z_]+$|^[0-9]+$|^[)]$"))
+                if (Regex.IsMatch(formulaTokens[i - 1], doublePattern)||
+                    Regex.IsMatch(formulaTokens[i - 1], varPattern)||
+                    formulaTokens[i - 1] == ")")
                 {
-                    if (!(Regex.IsMatch(formulaTokens[i], @"^[)+*/-]$")))
+                    if (!(Regex.IsMatch(formulaTokens[i], opPattern) || formulaTokens[i] == ")"))
                     {
                         extraFollowRule = false; break;
                     }
                 }
             }
 
-            return specificTokenRule && oneTokenRule && balanceParenRule && startTokenRule && endTokenRule && followRule && extraFollowRule;
+            return followRule && extraFollowRule;
 
         }
 
