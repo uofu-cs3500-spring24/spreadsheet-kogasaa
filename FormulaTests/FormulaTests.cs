@@ -280,17 +280,5 @@ namespace FormulaTests
             Assert.IsTrue(formula1.GetHashCode() == formula2.GetHashCode());
             Assert.IsFalse(formula1.GetHashCode() == formula3.GetHashCode());
         }
-
-        /// <summary>
-        /// Test UnEquals Sign when using "!="
-        /// </summary>
-        [TestMethod, Timeout(5000)]
-        public void EvaluatorTest()
-        {
-            
-        }
-
-
-
     }
 }

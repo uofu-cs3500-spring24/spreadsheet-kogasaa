@@ -47,7 +47,7 @@ namespace SpreadsheetUtilities
   public class Formula
   {
 
-        private List<string> formulaTokens;
+        private string normalizedFormula;
         private Func<string, string> nomalizor;
         private Func<string, bool> validor;
 
@@ -90,17 +90,22 @@ namespace SpreadsheetUtilities
         /// </summary>
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
-            this.formulaTokens = GetTokens(formula).ToList();
+            List<string> formulaTokens = GetTokens(formula).ToList();
             this.nomalizor = normalize;
             this.validor = isValid;
-            NormalizeFormulaVariabels();
-            if (!CheckFormat())
+            NormalizeFormulaVariabels(formulaTokens);
+            if (!CheckFormat(formulaTokens))
             {
                 throw new FormulaFormatException("the variable are all correct, but the format of formula - " + formula + " - is wrong!");
             }
+            this.normalizedFormula = "";
+            foreach (var token in formulaTokens)
+            {
+                this.normalizedFormula += token;
+            }
         }
 
-        private void NormalizeFormulaVariabels()
+        private void NormalizeFormulaVariabels(List<string> formulaTokens)
         {
             for(int i = 0; i < formulaTokens.Count; i++)
             {
@@ -132,7 +137,7 @@ namespace SpreadsheetUtilities
             }
         }
 
-        private bool CheckFormat()
+        private bool CheckFormat(List<string> formulaTokens)
         {
             // Patterns for individual tokens, Copied from get token method
             String opPattern = @"^[\+\-*/]$";
@@ -215,11 +220,12 @@ namespace SpreadsheetUtilities
         /// 3. when the end format is wrong (the stack situation when after going over all tokens in expression)
         ///     which also showed the expression has wrong format such as "1++", "1()3".
         /// </exception>
-        private static double EvaluateHelper(List<string> formulaTokens, Func<string, double> variableEvaluator)
+        private static double EvaluateHelper(string formulaStringExpression, Func<string, double> variableEvaluator)
         {
             // I learnt how to use generic stack class from microsoft learning webpage
             Stack<String> values = new Stack<String>();
             Stack<String> operators = new Stack<String>();
+            string[] formulaTokens = GetTokens(formulaStringExpression).ToArray();
             foreach (String token in formulaTokens)
             {
                 if (double.TryParse(token, out double tokenDoubleValue))
@@ -386,7 +392,7 @@ namespace SpreadsheetUtilities
         {
             try
             {
-                return EvaluateHelper(formulaTokens, lookup);
+                return EvaluateHelper(normalizedFormula, lookup);
             }catch (ArgumentException e) 
             {
                 return new FormulaError(e.Message);
@@ -408,6 +414,7 @@ namespace SpreadsheetUtilities
         public IEnumerable<String> GetVariables()
         {
             HashSet<String> variables = new HashSet<String>();
+            List<string> formulaTokens = GetTokens(normalizedFormula).ToList();
             foreach (string token in formulaTokens)
             {
                 if(Regex.IsMatch(token, @"^[a-zA-Z_]([0-9a-zA-Z_]+)?$"))
@@ -430,12 +437,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public override string ToString()
         {
-            string stringExpression = "";
-            foreach (string token in formulaTokens)
-            {
-                stringExpression += token;
-            }
-            return stringExpression;
+            return normalizedFormula;
         }
 
         /// <summary>
