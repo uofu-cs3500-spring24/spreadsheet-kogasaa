@@ -6,14 +6,14 @@ Course: CS 3500, University of Utah, School of Computing
 GitHub ID: kogasaa
 Repo: https://github.com/uofu-cs3500-spring24/spreadsheet-kogasaa.git
 Commit Date: 1-Feb-2024
-Project: FormulaTests
+Project: Formula
 Copyright: CS 3500 and Bingkun Han - This work may not be copied for use in Academic Coursework.
 
 # Comments to Evaluators
-This is the Tests of the Formula class. I test every methods in the formula class make sure the 100 persent of 
-code coverage. 60% of the test is about the constructor - to check if consturctor can detact a wrong fromat formula
-like 8 syntax rules. Then check the formula errors and formula equals methods, for ==, !=, equals method are all
-based on toString, they will check the the difference of two formula string format
+This is the Formula class. I implemente this formula class and make it work correctly
+In this class i create three class private values
+	1. private stirng formula expression - this is a string expression of a formula after normalizing the variables and number without white space
+	2. normalizer
 
 
 # Assignment Specific Topics
