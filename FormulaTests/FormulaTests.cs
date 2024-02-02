@@ -1,4 +1,21 @@
-
+/// <summary>
+/// Author: Bingkun Han
+/// Partner: None
+/// Date: 1st-Feb-2024
+/// Course: CS3500 Software Practice, 2024 Spring
+/// Copyright: CS 3500 and Bingkun Han - This work may not
+///            be copied for use in Academic Coursework.
+///
+/// I, Bingkun Han, certify that I wrote this code from scratch and
+/// did not copy it in part or whole from another source.  All
+/// references used in the completion of the assignments are cited
+/// in my README file.
+///
+/// File Contents
+/// This is a formula class test file, to test all the functionalities
+/// of a formula - the evaluate, constructor, throw a syntax error. 
+/// and make 100% code coverage for the formula API.
+/// </summary>
 using SpreadsheetUtilities;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;

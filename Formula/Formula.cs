@@ -1,4 +1,26 @@
-﻿// Skeleton written by Joe Zachary for CS 3500, September 2013
+﻿/// <summary>
+/// Author: Bingkun Han
+/// Partner: None
+/// Date: 1st-Feb-2024
+/// Course: CS3500 Software Practice, 2024 Spring
+/// Copyright: CS 3500 and Bingkun Han - This work may not
+///            be copied for use in Academic Coursework.
+///
+/// I, Bingkun Han, certify that I wrote this code from scratch and
+/// did not copy it in part or whole from another source.  All
+/// references used in the completion of the assignments are cited
+/// in my README file.
+///
+/// File Contents
+/// This is a implementaion of a formula API, I create a private string for the whole class 
+/// formula expression. I also create the helper method to check format in the constructor
+/// They will help constructor check the syntax of the formula. This implemention can make
+/// sure formula object will as it was expected.
+/// </summary>
+
+
+
+// Skeleton written by Joe Zachary for CS 3500, September 2013
 // Read the entire skeleton carefully and completely before you
 // do anything else!
 
@@ -21,6 +43,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -90,14 +113,21 @@ namespace SpreadsheetUtilities
         /// </summary>
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
+            //firstly tokenlization of the formula expression to check syntax errors
             List<string> formulaTokens = GetTokens(formula).ToList();
             this.nomalizor = normalize;
             this.validor = isValid;
+
+            //normalize all the variable and number (like normalize from 2e2 to 200)
             NormalizeFormulaVariabels(formulaTokens);
+
+            //check the formual snytax correction, throw formula format exception when it syntax wrong
             if (!CheckFormat(formulaTokens))
             {
                 throw new FormulaFormatException("the variable are all correct, but the format of formula - " + formula + " - is wrong!");
             }
+
+            //create a immutable private formula expression in the class
             this.normalizedFormula = "";
             foreach (var token in formulaTokens)
             {
@@ -105,6 +135,20 @@ namespace SpreadsheetUtilities
             }
         }
 
+
+        /// <summary>
+        /// This method is a helper method to change all the variable and numbers
+        ///      1. the variabel will become normalized version and use validor to check it
+        ///      2. the number like 2.00000, 2e3 will be transfer to normal double expression
+        ///         to like 2.0 and 2000.0
+        /// </summary>
+        /// <param name="formulaTokens">the formula tokens to normlaized</param>
+        /// <exception cref="FormulaFormatException"> 
+        /// it will throw FormulaFormat Exception in two Situations:
+        ///     1. when normlier goes wrong
+        ///     2. when validor regard normalized variable is illegal
+        /// 
+        /// </exception>
         private void NormalizeFormulaVariabels(List<string> formulaTokens)
         {
             for(int i = 0; i < formulaTokens.Count; i++)
@@ -141,6 +185,23 @@ namespace SpreadsheetUtilities
             }
         }
 
+        /// <summary>
+        /// This is a method to check formula rules:
+        ///     1. one token rule
+        ///     2. end token rule
+        ///     3. start token rule
+        ///     4. balance rule
+        ///     5. specialize token rule
+        ///     6. follow rule
+        ///     7. extra token rule
+        /// if one of the rule does not pass it will return wrong
+        /// the constructor will throw a FormulaFormatExcpeiton
+        /// </summary>
+        /// <param name="formulaTokens">a list of formula tokens</param>
+        /// <returns>
+        ///     1. True: when pass all 7 rules
+        ///     2. False: one of the rules does not pass
+        /// </returns>
         private bool CheckFormat(List<string> formulaTokens)
         {
             // Patterns for individual tokens, Copied from get token method
@@ -219,10 +280,9 @@ namespace SpreadsheetUtilities
         /// <param name="variableEvaluator">the function to convert string varible into a integer</param>
         /// <returns> double result, the result of the expression</returns>
         /// <exception cref="ArgumentException">
-        /// 1. when find a ")" but cannot find a "("
-        /// 2. when the evaluator cannot find a integer to replace variable by using variableEvaluator
-        /// 3. when the end format is wrong (the stack situation when after going over all tokens in expression)
-        ///     which also showed the expression has wrong format such as "1++", "1()3".
+        ///     1. when divid by 0 happend
+        ///     2. when lookup method goes wrong - unknown variabales, lookup throw a exception
+        ///     those will all make evaluator return a formula error
         /// </exception>
         private static double EvaluateHelper(string formulaStringExpression, Func<string, double> variableEvaluator)
         {
