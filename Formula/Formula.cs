@@ -71,8 +71,6 @@ namespace SpreadsheetUtilities
   {
 
         private string normalizedFormula;
-        private Func<string, string> nomalizor;
-        private Func<string, bool> validor;
 
 
         
@@ -115,13 +113,11 @@ namespace SpreadsheetUtilities
         {
             //firstly tokenlization of the formula expression to check syntax errors
             List<string> formulaTokens = GetTokens(formula).ToList();
-            this.nomalizor = normalize;
-            this.validor = isValid;
 
             //normalize all the variable and number (like normalize from 2e2 to 200)
-            NormalizeFormulaVariabels(formulaTokens);
+            NormalizeFormulaVariabels(formulaTokens, normalize, isValid);
 
-            //check the formual snytax correction, throw formula format exception when it syntax wrong
+            //check the formula syntax correction, throw formula format exception when it syntax wrong
             if (!CheckFormat(formulaTokens))
             {
                 throw new FormulaFormatException("the variable are all correct, but the format of formula - " + formula + " - is wrong!");
@@ -149,7 +145,7 @@ namespace SpreadsheetUtilities
         ///     2. when validor regard normalized variable is illegal
         /// 
         /// </exception>
-        private void NormalizeFormulaVariabels(List<string> formulaTokens)
+        private void NormalizeFormulaVariabels(List<string> formulaTokens, Func<string, string> nomalizor, Func<string, bool> validor)
         {
             for(int i = 0; i < formulaTokens.Count; i++)
             {
