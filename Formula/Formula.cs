@@ -134,6 +134,10 @@ namespace SpreadsheetUtilities
                         throw new FormulaFormatException("the orignal variable " + formulaTokens[i] + " is normalized to " + newFormatVariable +" but cannot pass the validor");
                     }
                 }
+                else if (Double.TryParse(formulaTokens[i], out double correctFormatDouble))
+                {
+                    formulaTokens[i] = correctFormatDouble.ToString();
+                }
             }
         }
 

@@ -80,6 +80,16 @@ namespace FormulaTests
         }
 
         /// <summary>
+        /// Parenthesis/Operator Following Rule
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void TestConstructorSyntaxError7_1()
+        {
+            Formula wrongFormat = new Formula("1+(+2)");
+        }
+
+        /// <summary>
         /// Extra Following Rule
         /// </summary>
         [TestMethod, Timeout(5000)]
@@ -87,6 +97,16 @@ namespace FormulaTests
         public void TestConstructorSyntaxError8()
         {
             Formula wrongFormat = new Formula("9(");
+        }
+
+        /// <summary>
+        /// Extra Following Rule
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void TestConstructorSyntaxError8_1()
+        {
+            Formula wrongFormat = new Formula("(9)1");
         }
 
         /// <summary>
@@ -240,9 +260,12 @@ namespace FormulaTests
             Formula formula1 = new Formula("a1+  a1+  c3+d4");
             Formula formula2 = new Formula("a1+A1  +c3+  D4", n => n.ToLower(), v => true);
             Assert.IsTrue(formula1.Equals(formula2));
-            Formula formula3 = new Formula("2e9");
-            Formula formula4 = new Formula("2000000000");
+            Formula formula3 = new Formula("2e2");
+            Formula formula4 = new Formula("200");
             Assert.IsTrue(formula4.Equals(formula3));
+            Formula formula5 = new Formula("2.0");
+            Formula formula6 = new Formula("2.00");
+            Assert.IsTrue(formula5.Equals(formula6));
         }
 
         /// <summary>
@@ -298,7 +321,10 @@ namespace FormulaTests
             Assert.AreEqual(234.0, formula3.Evaluate(s => 234.0));
             Formula formula4 = new Formula("234.02 -234.0");
             Assert.AreEqual(0.02, (double)formula4.Evaluate(s => 234.0), 0.001);
-
+            Formula formula5 = new Formula("1+(1*(2/(2-(1)+10)-23)+234)*2334");
+            Assert.AreEqual(492899.364, (double)formula5.Evaluate(s => 12398741983274), 0.001);
+            Formula formula6 = new Formula("b1");
+            Assert.AreEqual(1.0,formula6.Evaluate(s=>1));
         }
     }
 }
