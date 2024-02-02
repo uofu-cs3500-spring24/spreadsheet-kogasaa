@@ -240,6 +240,9 @@ namespace FormulaTests
             Formula formula1 = new Formula("a1+  a1+  c3+d4");
             Formula formula2 = new Formula("a1+A1  +c3+  D4", n => n.ToLower(), v => true);
             Assert.IsTrue(formula1.Equals(formula2));
+            Formula formula3 = new Formula("2e9");
+            Formula formula4 = new Formula("2000000000");
+            Assert.IsTrue(formula4.Equals(formula3));
         }
 
         /// <summary>
@@ -269,7 +272,7 @@ namespace FormulaTests
         }
 
         /// <summary>
-        /// Test UnEquals Sign when using "!="
+        /// Test HashCode
         /// </summary>
         [TestMethod, Timeout(5000)]
         public void TestHashCode()
@@ -279,6 +282,23 @@ namespace FormulaTests
             Formula formula3 = new Formula("a1+A1+c3+d4", n => n.ToUpper(), v => true);
             Assert.IsTrue(formula1.GetHashCode() == formula2.GetHashCode());
             Assert.IsFalse(formula1.GetHashCode() == formula3.GetHashCode());
+        }
+
+        /// <summary>
+        /// Test if evaluate handle all caculation situation
+        /// </summary>
+        [TestMethod, Timeout(5000)]
+        public void TestEvaluator()
+        {
+            Formula formula1 = new Formula("1");
+            Assert.AreEqual(1.0, formula1.Evaluate(s=>1));
+            Formula formula2 = new Formula("2e3");
+            Assert.AreEqual(2000.0, formula2.Evaluate(s => 1));
+            Formula formula3 = new Formula("234 ");
+            Assert.AreEqual(234.0, formula3.Evaluate(s => 234.0));
+            Formula formula4 = new Formula("234.02 -234.0");
+            Assert.AreEqual(0.02, (double)formula4.Evaluate(s => 234.0), 0.001);
+
         }
     }
 }

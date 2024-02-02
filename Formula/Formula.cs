@@ -263,24 +263,21 @@ namespace SpreadsheetUtilities
                 }
                 else
                 {
-                    if (token != "" && token != " ")
+                    try
                     {
-                        try
+                        double lookedValue = variableEvaluator(token);
+                        if (operators.Count > 0)
                         {
-                            double lookedValue = variableEvaluator(token);
-                            if (operators.Count > 0)
-                            {
-                                DivideMultipleHelper(values, operators, lookedValue);
-                            }
-                            else
-                            {
-                                values.Push(lookedValue.ToString());
-                            }
+                            DivideMultipleHelper(values, operators, lookedValue);
                         }
-                        catch
+                        else
                         {
-                            throw new ArgumentException("Unknown Variable exist: " + token + " or divide by 0 happened");
+                            values.Push(lookedValue.ToString());
                         }
+                    }
+                    catch
+                    {
+                        throw new ArgumentException("Unknown Variable exist: " + token + " or divide by 0 happened");
                     }
                 }
             }
