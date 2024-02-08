@@ -84,8 +84,10 @@ namespace SS
         {
             NameChecking(name);
             Cell cell = new Cell(name, number);
+            object oldCellValue = new object();
             if (SpreadsheetCells.ContainsKey(name))
             {
+                oldCellValue = SpreadsheetCells[name].Value;
                 SpreadsheetCells[name] = cell;
             }
             else
@@ -93,7 +95,7 @@ namespace SS
                 SpreadsheetCells.Add(name, cell);
             }
             HashSet<string> changedCells = GetCellsToRecalculate(name).ToHashSet();
-            DeletePreviousDependees(name);
+            DeletePreviousDependees(name, oldCellValue);
             return changedCells;
         }
 
@@ -105,8 +107,10 @@ namespace SS
                 throw new ArgumentNullException("The set text is null!");
             }
             Cell cell = new Cell(name, text);
+            object oldCellValue = new object();
             if (SpreadsheetCells.ContainsKey(name))
             {
+                oldCellValue = SpreadsheetCells[name].Value;
                 SpreadsheetCells[name] = cell;
             }
             else
@@ -118,7 +122,7 @@ namespace SS
                 SpreadsheetCells.Remove(name);
             }
             HashSet<string> changedCells = GetCellsToRecalculate(name).ToHashSet();
-            DeletePreviousDependees(name);
+            DeletePreviousDependees(name, oldCellValue);
             return changedCells;
         }
 
@@ -148,11 +152,11 @@ namespace SS
             return changedCells;
         }
 
-        private void DeletePreviousDependees(string name)
+        private void DeletePreviousDependees(string name, object oldCellValue)
         {
             if (SpreadsheetCells.ContainsKey(name))
             {
-                if(SpreadsheetCells[name].Value.GetType() == typeof(Formula))
+                if(oldCellValue.GetType() == typeof(Formula))
                 {
                     DependencyGraph.ReplaceDependees(name, new List<string>());
                 }
@@ -176,6 +180,5 @@ namespace SS
             Value = value;
             Name = name;
         }
-
     }
 }

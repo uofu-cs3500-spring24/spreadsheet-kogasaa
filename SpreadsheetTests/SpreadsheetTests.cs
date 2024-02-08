@@ -298,5 +298,44 @@ namespace SS
 
 
         //TODO : to create a test to test get direct dependents
+
+        /// <summary>
+        /// Recover a formula cell to a string or a double cell
+        /// </summary>
+        [TestMethod]
+        public void TestRecoverFormula()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet();
+            HashSet<string> expectedNonNullCellNames = new HashSet<string>();
+            for (int i = 0; i < 10; i++)
+            {
+                spreadsheet.SetCellContents("a" + i, new Formula("a" + (i + 1)));
+                expectedNonNullCellNames.Add("a" + i);
+            }
+            HashSet<string> result1 = new HashSet<string> {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9"};
+            Assert.IsTrue(spreadsheet.SetCellContents("a9", 11.0).SetEquals(result1));
+            Assert.IsTrue(spreadsheet.SetCellContents("a9", "what").SetEquals(result1));
+            Assert.IsTrue(spreadsheet.SetCellContents("a9", new Formula("1+21")).SetEquals(result1));
+            Assert.IsTrue(spreadsheet.SetCellContents("a9", new Formula("a11+a12")).SetEquals(result1));
+            Assert.IsTrue(spreadsheet.SetCellContents("a9", "cover Formula with string").SetEquals(result1));
+            Assert.IsTrue(spreadsheet.GetNamesOfAllNonemptyCells().ToHashSet().SetEquals(expectedNonNullCellNames));
+        }
+
+        /// <summary>
+        /// Recover when old dependees disappear
+        /// </summary>
+        [TestMethod]
+        public void TestRecoverFormula2()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet();
+            spreadsheet.SetCellContents("a1", new Formula("b1+b2+b3+b4"));
+            HashSet<string> expected = new HashSet<string> { "a1", "b4" };
+                
+            Assert.IsTrue(expected.SetEquals(spreadsheet.SetCellContents("b4", 9293.9)));
+
+            spreadsheet.SetCellContents("a1", "string");
+            Assert.IsTrue(new HashSet<string> {"b4"}.SetEquals(spreadsheet.SetCellContents("b4", 9293.9)));
+
+        }
     }
 }
