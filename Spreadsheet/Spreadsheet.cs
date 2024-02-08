@@ -41,7 +41,8 @@ namespace SS
             NameChecking(name);
             if (SpreadsheetCells.ContainsKey(name))
             {
-                return SpreadsheetCells[name].Value;
+                Cell targetCell = SpreadsheetCells[name];
+                return targetCell.Value;
             }
             else
             {
@@ -58,7 +59,7 @@ namespace SS
         /// Throw this exception</exception>
         private static void NameChecking(string name)
         {
-            if (name == null || Regex.IsMatch(name, correctNamePattern))
+            if (name == null || !Regex.IsMatch(name, correctNamePattern))
             {
                 throw new InvalidNameException();
             }
@@ -70,7 +71,7 @@ namespace SS
         /// <returns></returns>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
-            return SpreadsheetCells.Keys;
+            return SpreadsheetCells.Keys.ToHashSet();
         }
 
         /// <summary>
@@ -85,13 +86,15 @@ namespace SS
             Cell cell = new Cell(name, number);
             if (SpreadsheetCells.ContainsKey(name))
             {
-                SpreadsheetCells[name].Value = cell;
+                SpreadsheetCells[name] = cell;
             }
             else
             {
                 SpreadsheetCells.Add(name, cell);
             }
-            return GetDirectDependents(name).ToHashSet();
+            HashSet<string> changedCells = GetCellsToRecalculate(name).ToHashSet();
+            DeletePreviousDependees(name);
+            return changedCells;
         }
 
         public override ISet<string> SetCellContents(string name, string text)
@@ -104,7 +107,7 @@ namespace SS
             Cell cell = new Cell(name, text);
             if (SpreadsheetCells.ContainsKey(name))
             {
-                SpreadsheetCells[name].Value = cell;
+                SpreadsheetCells[name] = cell;
             }
             else
             {
@@ -114,26 +117,35 @@ namespace SS
             {
                 SpreadsheetCells.Remove(name);
             }
-            return GetDirectDependents(name).ToHashSet();
+            HashSet<string> changedCells = GetCellsToRecalculate(name).ToHashSet();
+            DeletePreviousDependees(name);
+            return changedCells;
         }
 
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
             NameChecking(name);
-            if(formula == null)
+            try
+            {
+                formula.Equals(null);
+            }
+            catch
             {
                 throw new ArgumentNullException("You are setting a null formula in the cell - " + name +" !");
             }
             Cell cell = new Cell(name, formula);
             if (SpreadsheetCells.ContainsKey(name))
             {
-                SpreadsheetCells[name].Value = cell;
+                SpreadsheetCells[name] = cell;
             }
             else
             {
                 SpreadsheetCells.Add(name, cell);
             }
-            return GetDirectDependents(name).ToHashSet();
+            HashSet<string> newDependees = formula.GetVariables().ToHashSet();
+            DependencyGraph.ReplaceDependees(name, newDependees);
+            HashSet<string> changedCells = GetCellsToRecalculate(name).ToHashSet();
+            return changedCells;
         }
 
         private void DeletePreviousDependees(string name)

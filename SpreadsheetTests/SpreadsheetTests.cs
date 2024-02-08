@@ -18,10 +18,10 @@ namespace SS
             Spreadsheet.SetCellContents("a3", "Oh man this is a text");
             Spreadsheet.SetCellContents("a1", 2);
             IEnumerable<string> result = Spreadsheet.GetNamesOfAllNonemptyCells();
-            Assert.AreEqual(new HashSet<string> { "a1", "a2", "a3" }, result);
+            Assert.IsTrue(new HashSet<string> { "a1", "a2", "a3" }.SetEquals(result));
             Spreadsheet.SetCellContents("a1", "");
             IEnumerable<string> result2 = Spreadsheet.GetNamesOfAllNonemptyCells();
-            Assert.AreEqual(new HashSet<string> { "a2", "a3" }, result);
+            Assert.IsTrue(new HashSet<string> { "a2", "a3" }.SetEquals(result2));
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace SS
             Assert.AreEqual(3.0, spreadsheet.GetCellContents("a3"));
             HashSet<string> result = (HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells();
             HashSet<string> expected = new HashSet<string> { "a2", "a3", "a1"};
-            Assert.AreEqual(expected, result);
+            Assert.IsTrue(expected.SetEquals(result));
         }
 
 
@@ -169,10 +169,10 @@ namespace SS
                 spreadsheet.SetCellContents("a" + i, "string: " + i);
                 expectedNonNullCellNames.Add("a" + i);
             }
-            Assert.AreEqual(expectedNonNullCellNames, (HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells());
+            Assert.IsTrue(expectedNonNullCellNames.SetEquals(spreadsheet.GetNamesOfAllNonemptyCells()));
             for (int i = 0;i < 10;i++)
             {
-                Assert.AreEqual("string "+i, spreadsheet.GetCellContents("a"+i));
+                Assert.AreEqual("string: "+i, spreadsheet.GetCellContents("a"+i));
             }
         }
 
@@ -231,11 +231,11 @@ namespace SS
         public void TestSetFormulaWrong5()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
-            for (int i = 0; i < 50; i++) 
+            for (int i = 0; i < 2; i++) 
             {
-                spreadsheet.SetCellContents("a"+i, new Formula("a" + i + 1));
+                spreadsheet.SetCellContents("a"+i, new Formula("a" + (i + 1)));
             }
-            spreadsheet.SetCellContents("a51", new Formula("a1"));
+            spreadsheet.SetCellContents("a2", new Formula("a0"));
         }
 
         /// <summary>
@@ -251,17 +251,17 @@ namespace SS
                 spreadsheet.SetCellContents("a" + i, new Formula(i+"*"+i));
                 expectedNonNullCellNames.Add("a" + i);
             }
-            Assert.AreEqual(expectedNonNullCellNames, (HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells());
+            Assert.IsTrue(expectedNonNullCellNames.SetEquals((HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells()));
             for (int i = 0; i < 10; i++)
             {
-                Assert.AreEqual((double)i*i, spreadsheet.GetCellContents("a" + i));
+                Assert.AreEqual(new Formula(i + "*" + i), spreadsheet.GetCellContents("a" + i));
             }
             for (int i = 0;i < 5; i++)
             {
                 spreadsheet.SetCellContents("a" + i, "");
                 expectedNonNullCellNames.Remove("a" + i);
             }
-            Assert.AreEqual(expectedNonNullCellNames, (HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells());
+            Assert.IsTrue(expectedNonNullCellNames.SetEquals((HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells()));
         }
 
         /// <summary>
@@ -274,20 +274,20 @@ namespace SS
             HashSet<string> expectedNonNullCellNames = new HashSet<string>();
             for (int i = 0; i < 10; i++)
             {
-                spreadsheet.SetCellContents("a" + i, new Formula("a" + i));
+                spreadsheet.SetCellContents("a" + i, new Formula("a" + (i+1)));
                 expectedNonNullCellNames.Add("a" + i);
             }
-            Assert.AreEqual(expectedNonNullCellNames, (HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells());
+            Assert.IsTrue(expectedNonNullCellNames.SetEquals((HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells()));
             for (int i = 0; i < 10; i++)
             {
-                Assert.AreEqual((double)i * i, spreadsheet.GetCellContents("a" + i));
+                Assert.AreEqual(new Formula("a" + (i + 1)), spreadsheet.GetCellContents("a" + i));
             }
             for (int i = 0; i < 5; i++)
             {
                 spreadsheet.SetCellContents("a" + i, "");
                 expectedNonNullCellNames.Remove("a" + i);
             }
-            Assert.AreEqual(expectedNonNullCellNames, (HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells());
+            Assert.IsTrue(expectedNonNullCellNames.SetEquals((HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells()));
             spreadsheet.SetCellContents("a10", new Formula("2*2*2"));
             Assert.AreEqual(spreadsheet.GetCellContents("a5"), new Formula("a6"));
             spreadsheet.SetCellContents("a10", 7.0);
