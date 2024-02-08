@@ -99,6 +99,13 @@ namespace SS
             return changedCells;
         }
 
+        /// <summary>
+        /// This is the set cell content as
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public override ISet<string> SetCellContents(string name, string text)
         {
             NameChecking(name);
