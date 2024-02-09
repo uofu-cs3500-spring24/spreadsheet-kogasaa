@@ -177,6 +177,28 @@ namespace SS
             return changedCells;
         }
 
+        /// <summary>
+        /// Set a Formula in a cell and put it in the dictioanry. Then it will
+        /// return the cells depended on it which need recalculating including itself.
+        /// </summary>
+        /// <param name="name">
+        /// The name of the cell
+        /// </param>
+        /// <param name="text">
+        /// The formula the cell will contain
+        /// </param>
+        /// <exception cref="InvalidNameException"
+        /// it will throw a invalidNameException when the name is invalid or null
+        /// </exception>
+        /// <exception cref="ArgumentNullException"
+        /// it will throw a ArugmentNullException when the formula is null
+        /// </exception>
+        /// <exception cref="CircularException"
+        /// When there is a circular dependecy exist in the spreadsheet dependency graph
+        /// </exception>
+        /// <returns>
+        /// The Set of cells needed to recalculated included it self
+        /// </returns>
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
             NameChecking(name);
@@ -203,6 +225,15 @@ namespace SS
             return changedCells;
         }
 
+        /// <summary>
+        /// THis is a helper method used in the setcellcontent (double version and string 
+        /// version)
+        /// This method will delete all the dependees when a cell used be a formula ,and it
+        /// will becaome a text or double. It will delete the dependency with all variables
+        ///  in the old formula.
+        /// </summary>
+        /// <param name="name">the cell name to modify</param>
+        /// <param name="oldCellValue"> the cell's previous value</param>
         private void DeletePreviousDependees(string name, object oldCellValue)
         {
             if (SpreadsheetCells.ContainsKey(name))
@@ -214,6 +245,11 @@ namespace SS
             }
         }
 
+        /// <summary>
+        /// It will get the direct dependents of a cell.
+        /// </summary>
+        /// <param name="name">the target cell used to get its direct dependent</param>
+        /// <returns></returns>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
             HashSet<string> dependents = DependencyGraph.GetDependents(name).ToHashSet();
@@ -221,11 +257,23 @@ namespace SS
         }
     }
 
+    /// <summary>
+    /// This cell class is to create a cell in a spreadsheet and Stored in it. It has basic name 
+    /// and value inside it
+    /// </summary>
     internal class Cell
     {
+        // the name of this cell
         public string Name { get; set; }
+
+        // the value of this cell
         public object Value { get; set; }
 
+        /// <summary>
+        /// The constructor to create a cell object with given name and variable
+        /// </summary>
+        /// <param name="name">given name of the cell</param>
+        /// <param name="value">given variabel for the cell, it should be double , string, or formula</param>
         public Cell(string name, object value)
         {
             Value = value;
