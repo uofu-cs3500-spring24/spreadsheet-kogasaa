@@ -1,3 +1,22 @@
+/// <summary>
+/// Author: Bingkun Han
+/// Partner: None
+/// Date: 8th-Feb-2024
+/// Course: CS3500 Software Practice, 2024 Spring
+/// Copyright: CS 3500 and Bingkun Han - This work may not
+///            be copied for use in Academic Coursework.
+///
+/// I, Bingkun Han, certify that I wrote this code from scratch and
+/// did not copy it in part or whole from another source.  All
+/// references used in the completion of the assignments are cited
+/// in my README file.
+///
+/// File Contents
+/// This is the test file for testing all the methods in spreadsheet. Including all the 
+/// wrong and right situations for the set cell contents. and all the dependency 
+/// related test to make sure after add many cells the dependency is still correct
+/// </summary>
+
 using SpreadsheetUtilities;
 
 namespace SS
@@ -297,7 +316,6 @@ namespace SS
         }
 
 
-        //TODO : to create a test to test get direct dependents
 
         /// <summary>
         /// Recover a formula cell to a string or a double cell

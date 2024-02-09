@@ -5,7 +5,7 @@ Start Date: 12-Jan-2024
 Course: CS 3500, University of Utah, School of Computing
 GitHub ID: kogasaa
 Repo: https://github.com/uofu-cs3500-spring24/spreadsheet-kogasaa.git
-Commit Date: 1-Feb-2024
+Commit Date: 8-Feb-2024
 Solution: Spreadsheet
 Copyright: CS 3500 and Bingkun Han - This work may not be copied for use in Academic Coursework.
 
@@ -14,8 +14,9 @@ Copyright: CS 3500 and Bingkun Han - This work may not be copied for use in Acad
 
 The Spreadsheet making is still on progress, now it has a formula evaluator library to calculate the 
 formula and get right answer from the formla. Then It has a dependency to control all relationships 
-between deifferent cells. And there is a formula class has more functions as a formula. Futrue 
-extensions are still in prgress.
+between deifferent cells. And there is a formula class has more functions as a formula. Next, there is a 
+Spreadsheet class to sotre all the cells and dependecies in the spreadsheet.Futrue extensions are still 
+in prgress.
 
 
 # Time Expenditures:
@@ -25,3 +26,7 @@ extensions are still in prgress.
 	NOTE: Coding is faster than I thought TTD improve my implementation Time
 
 	3. Assignment Three:     Predicted Hours:  14 hours(5h for implementaion + 9h for debugging)            Actual Hours:  3h for writing the tests + 9h for implementaiton and debuging
+	Note: it is really near as i expected
+
+	4. Assignment Four:    Predicted Hours: 14 hours             Actual Hours:  6 hours for testing + 5 hours to implementaion
+	Note: the inplementaion is longer than I thought, because i was confused about the exception throw in every method
