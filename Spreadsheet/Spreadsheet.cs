@@ -1,4 +1,25 @@
-﻿using SpreadsheetUtilities;
+﻿/// <summary>
+/// Author: Bingkun Han
+/// Partner: None
+/// Date: 8th-Feb-2024
+/// Course: CS3500 Software Practice, 2024 Spring
+/// Copyright: CS 3500 and Bingkun Han - This work may not
+///            be copied for use in Academic Coursework.
+///
+/// I, Bingkun Han, certify that I wrote this code from scratch and
+/// did not copy it in part or whole from another source.  All
+/// references used in the completion of the assignments are cited
+/// in my README file.
+///
+/// File Contents
+/// It is child class of abstact class of spreadsheet. I implemented all teh 
+/// methods from the abstract spreadsheet class. I also create the internal 
+/// cell class for future convinent coding. Also helper method for checking
+/// name valid or null. Then I also have helper method to modify the spread-
+/// sheet.
+/// </summary>
+
+using SpreadsheetUtilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,11 +96,22 @@ namespace SS
         }
 
         /// <summary>
-        /// Set a double in a cell it 
+        /// Set a double in a cell and put it in the dictioanry. Then it will
+        /// return the cells depended on it which need recalculating including 
+        /// itself.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="number"></param>
-        /// <returns></returns>
+        /// <param name="name">
+        /// The name of the cell
+        /// </param>
+        /// <param name="number">
+        /// The double this cell will has
+        /// </param>
+        /// <exception cref="InvalidNameException"
+        /// it will throw a invalidNameException when the name is invalid or null
+        /// </exception>
+        /// <returns>
+        /// The Set of cells needed to recalculated included it self
+        /// </returns>
         public override ISet<string> SetCellContents(string name, double number)
         {
             NameChecking(name);
@@ -100,12 +132,24 @@ namespace SS
         }
 
         /// <summary>
-        /// This is the set cell content as
+        /// Set a string in a cell and put it in the dictioanry. Then it will
+        /// return the cells depended on it which need recalculating including itself.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <param name="name">
+        /// The name of the cell
+        /// </param>
+        /// <param name="text">
+        /// The text the cell will contain
+        /// </param>
+        /// <exception cref="InvalidNameException"
+        /// it will throw a invalidNameException when the name is invalid or null
+        /// </exception>
+        /// <exception cref="ArgumentNullException"
+        /// it will throw a ArugmentNullException when the text is null
+        /// </exception>
+        /// <returns>
+        /// The Set of cells needed to recalculated included it self
+        /// </returns>
         public override ISet<string> SetCellContents(string name, string text)
         {
             NameChecking(name);

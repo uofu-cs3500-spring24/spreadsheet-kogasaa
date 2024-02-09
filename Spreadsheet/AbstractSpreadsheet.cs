@@ -1,4 +1,24 @@
-﻿// Written by Joe Zachary for CS 3500, September 2013
+﻿/// <summary>
+/// Author: Bingkun Han
+/// Partner: None
+/// Date: 8th-Feb-2024
+/// Course: CS3500 Software Practice, 2024 Spring
+/// Copyright: CS 3500 and Bingkun Han - This work may not
+///            be copied for use in Academic Coursework.
+///
+/// I, Bingkun Han, certify that I wrote this code from scratch and
+/// did not copy it in part or whole from another source.  All
+/// references used in the completion of the assignments are cited
+/// in my README file.
+///
+/// File Contents
+/// It is abstract class for spreadsheet and it has all the basic 
+/// methods for the spreadsheet class. Then there are helper methods -
+/// get cells to recalculated, visited method. I use them in the Spreadsheet
+/// Class.
+/// </summary>
+
+// Written by Joe Zachary for CS 3500, September 2013
 
 using System;
 using System.Collections.Generic;
@@ -311,11 +331,10 @@ namespace SS
         }
 
 
-        // TODO - finish this comment
         /// <summary>
-        /// A helper for the GetCellsToRecalculate method.
-        /// 
-        ///   -- You should fully comment what is going on below using XML tags as appropriate --
+        /// This method using recution for keeping using visit and get direct Dependents method to 
+        /// Find all the direct and indirect dependent cells in the dependency graph and put them in 
+        /// the visited Set
         /// </summary>
         private void Visit(String start, String name, ISet<String> visited, LinkedList<String> changed)
         {
