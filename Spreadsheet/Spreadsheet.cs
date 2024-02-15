@@ -23,6 +23,7 @@ using SpreadsheetUtilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -33,21 +34,57 @@ namespace SS
 {
     public class Spreadsheet : AbstractSpreadsheet
     {
-        // the dictionary is a container of cells, string is name of object, and a cell object
         private Dictionary<string, Cell> SpreadsheetCells;
-        // dependency graph of a spreadsheet
         private DependencyGraph DependencyGraph;
+        private static string correctNamePattern = @"^[a-zA-Z]+[0-9]+$";
+        
+       
+        /// <summary>
+        /// True if this spreadsheet has been modified since it was created or saved                  
+        /// (whichever happened most recently); false otherwise.
+        /// </summary>
+        public override bool Changed { get => throw new NotImplementedException(); protected set => throw new NotImplementedException(); }
 
-        private static string correctNamePattern = @"^[a-zA-Z_]([0-9a-zA-Z_]+)?$";
 
         /// <summary>
         /// Construct a empty spreadsheet
         /// </summary>
-        public Spreadsheet()
+        public Spreadsheet():
+        this(n => true, n => n, "Default")
+        {
+        }
+
+        /// <summary>
+        /// Construct a empty spreadsheet
+        /// </summary>
+        public Spreadsheet(Func<string, bool> givenIsValid, Func<string, string> givenNormalizor, string VersionString):
+        base(givenIsValid, givenNormalizor, VersionString)
         {
             SpreadsheetCells = new Dictionary<string, Cell>();
             DependencyGraph = new DependencyGraph();
         }
+
+        /// <summary>
+        /// Construct a empty spreadsheet
+        /// </summary>
+        public Spreadsheet(string pathToFile, Func<string, bool> givenIsValid, Func<string, string> givenNormalizor, string VersionString):
+        base(givenIsValid, givenNormalizor, VersionString)
+        {
+            //TODO - the json reader from a file and create teh spreadsheet cells and dependency graph
+            SpreadsheetCells = new Dictionary<string, Cell>();
+            DependencyGraph = new DependencyGraph();
+        }
+
+        /// <summary>
+        /// It will return all the cell with non-empty contents inside it
+        /// </summary>
+        /// <returns></returns>
+        public override IEnumerable<string> GetNamesOfAllNonemptyCells()
+        {
+            return SpreadsheetCells.Keys.ToHashSet();
+        }
+
+
 
         /// <summary>
         /// This will return the object that the same name cell contained
@@ -59,7 +96,8 @@ namespace SS
         /// or it is null</exception>
         public override object GetCellContents(string name)
         {
-            NameChecking(name);
+            //TODO figure out if the parameter should be normalized or not
+            name = NormalizeAncCheckName(name);
             if (SpreadsheetCells.ContainsKey(name))
             {
                 Cell targetCell = SpreadsheetCells[name];
@@ -78,21 +116,22 @@ namespace SS
         /// <param name="name">name of Cell</param>
         /// <exception cref="InvalidNameException"> If name is null or invalid
         /// Throw this exception</exception>
-        private static void NameChecking(string name)
+        private string NormalizeAncCheckName(string name)
         {
-            if (name == null || !Regex.IsMatch(name, correctNamePattern))
+            name = Normalize(name);
+            if (IsValid(name))
+            {
+                if (name == null || !Regex.IsMatch(name, correctNamePattern))
+                {
+                    throw new InvalidNameException();
+                }
+            }
+            else
             {
                 throw new InvalidNameException();
             }
-        }
 
-        /// <summary>
-        /// It will return all the cell with non-empty contents inside it
-        /// </summary>
-        /// <returns></returns>
-        public override IEnumerable<string> GetNamesOfAllNonemptyCells()
-        {
-            return SpreadsheetCells.Keys.ToHashSet();
+            return name;
         }
 
         /// <summary>
@@ -112,9 +151,9 @@ namespace SS
         /// <returns>
         /// The Set of cells needed to recalculated included it self
         /// </returns>
-        public override ISet<string> SetCellContents(string name, double number)
+        protected override IList<string> SetCellContents(string name, double number)
         {
-            NameChecking(name);
+            name = NormalizeAncCheckName(name);
             Cell cell = new Cell(name, number);
             object oldCellValue = new object();
             if (SpreadsheetCells.ContainsKey(name))
@@ -128,7 +167,7 @@ namespace SS
             }
             HashSet<string> changedCells = GetCellsToRecalculate(name).ToHashSet();
             DeletePreviousDependees(name, oldCellValue);
-            return changedCells;
+            return changedCells.ToList();
         }
 
         /// <summary>
@@ -150,9 +189,9 @@ namespace SS
         /// <returns>
         /// The Set of cells needed to recalculated included it self
         /// </returns>
-        public override ISet<string> SetCellContents(string name, string text)
+        protected override IList<string> SetCellContents(string name, string text)
         {
-            NameChecking(name);
+            name = NormalizeAncCheckName(name);
             if(text == null)
             {
                 throw new ArgumentNullException("The set text is null!");
@@ -174,7 +213,7 @@ namespace SS
             }
             HashSet<string> changedCells = GetCellsToRecalculate(name).ToHashSet();
             DeletePreviousDependees(name, oldCellValue);
-            return changedCells;
+            return changedCells.ToList();
         }
 
         /// <summary>
@@ -199,9 +238,10 @@ namespace SS
         /// <returns>
         /// The Set of cells needed to recalculated included it self
         /// </returns>
-        public override ISet<string> SetCellContents(string name, Formula formula)
+        protected override IList<string> SetCellContents(string name, Formula formula)
         {
-            NameChecking(name);
+            //Check formula and name correction
+            name = NormalizeAncCheckName(name);
             try
             {
                 formula.Equals(null);
@@ -212,6 +252,7 @@ namespace SS
             }
             Cell cell = new Cell(name, formula);
 
+            //Check if it was "" cell
             bool ifItWasEmptyCell = false;
             object oldCellValue = GetCellContents(name);
             if (oldCellValue.GetType() == typeof(string) && (string)oldCellValue == "")
@@ -219,6 +260,9 @@ namespace SS
                 ifItWasEmptyCell = true;
             }
             HashSet<string> oldDependees = DependencyGraph.GetDependees(name).ToHashSet();
+
+
+            //create or edit the formula cell
             Cell oldCell = new Cell(name, oldCellValue);
 
             if (SpreadsheetCells.ContainsKey(name))
@@ -231,11 +275,13 @@ namespace SS
             }
             HashSet<string> newDependees = formula.GetVariables().ToHashSet();
             DependencyGraph.ReplaceDependees(name, newDependees);
+
+            //If the problem Happened
             try
             {
                 HashSet<string> changedCells = GetCellsToRecalculate(name).ToHashSet();
                 DeletePreviousDependees(name, oldCellValue);
-                return changedCells;
+                return changedCells.ToList();
             }
             catch(CircularException e)
             {
@@ -247,9 +293,6 @@ namespace SS
                 }
                 throw new CircularException();
             }
-            
-            
-            
         }
 
         /// <summary>
@@ -281,6 +324,39 @@ namespace SS
         {
             HashSet<string> dependents = DependencyGraph.GetDependents(name).ToHashSet();
             return dependents;
+        }
+
+
+        public override IList<string> SetContentsOfCell(string name, string content)
+        {
+            if(double.TryParse(content, out double actualDouble))
+            {
+                SetCellContents(name, actualDouble);
+            }else if (content[0] == '=')
+            {
+                content = content.Substring(1);
+                Formula actualFormula = new Formula(content);
+            }
+        }
+
+        public override string GetSavedVersion(string filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Save(string filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GetXML()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object GetCellValue(string name)
+        {
+            throw new NotImplementedException();
         }
     }
 
