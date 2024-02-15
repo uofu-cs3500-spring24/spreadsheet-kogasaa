@@ -211,6 +211,16 @@ namespace SS
                 throw new ArgumentNullException("You are setting a null formula in the cell - " + name +" !");
             }
             Cell cell = new Cell(name, formula);
+
+            bool ifItWasEmptyCell = false;
+            object oldCellValue = GetCellContents(name);
+            if (oldCellValue.GetType() == typeof(string) && (string)oldCellValue == "")
+            {
+                ifItWasEmptyCell = true;
+            }
+            HashSet<string> oldDependees = DependencyGraph.GetDependees(name).ToHashSet();
+            Cell oldCell = new Cell(name, oldCellValue);
+
             if (SpreadsheetCells.ContainsKey(name))
             {
                 SpreadsheetCells[name] = cell;
@@ -221,8 +231,25 @@ namespace SS
             }
             HashSet<string> newDependees = formula.GetVariables().ToHashSet();
             DependencyGraph.ReplaceDependees(name, newDependees);
-            HashSet<string> changedCells = GetCellsToRecalculate(name).ToHashSet();
-            return changedCells;
+            try
+            {
+                HashSet<string> changedCells = GetCellsToRecalculate(name).ToHashSet();
+                DeletePreviousDependees(name, oldCellValue);
+                return changedCells;
+            }
+            catch(CircularException e)
+            {
+                SpreadsheetCells[name] = oldCell;
+                DependencyGraph.ReplaceDependees(name, oldDependees);
+                if (ifItWasEmptyCell)
+                {
+                    SpreadsheetCells.Remove(name);
+                }
+                throw new CircularException();
+            }
+            
+            
+            
         }
 
         /// <summary>
