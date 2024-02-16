@@ -34,6 +34,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using SpreadsheetUtilities;
 
 namespace SS
@@ -57,7 +58,11 @@ namespace SS
     {
     }
 
-
+    //TODO - If the version of the saved spreadsheet does not match the version parameter provided to the constructor
+    //TODO - If any of the names contained in the saved spreadsheet are invalid
+    //TODO - If any invalid formulas or circular dependencies are encountered
+    //TODO - If there are any problems opening, reading, or closing the file
+    // There are no doubt other things that can go wrong
     /// <summary>
     ///   <para>
     ///     Thrown to indicate that a read or write attempt has failed.
@@ -494,12 +499,14 @@ namespace SS
         ///       </para>
         /// </returns>
         public abstract IList<String> SetContentsOfCell(String name, String content);
+        // TODO - test when there is a FormulaFormatException
 
         /// <summary>
         /// True if this spreadsheet has been modified since it was created or saved                  
         /// (whichever happened most recently); false otherwise.
         /// </summary>
         public abstract bool Changed { get; protected set; }
+
 
         /// <summary>
         /// Method used to determine whether a string that consists of one or more letters
@@ -581,12 +588,14 @@ namespace SS
         /// SpreadsheetReadWriteException with an explanatory message.
         /// </summary>
         public abstract void Save(String filename);
+        //TODO - Test Save
 
         /// <summary>
         ///   Return an XML representation of the spreadsheet's contents
         /// </summary>
         /// <returns> contents in XML form </returns>
         public abstract string GetXML();
+        //TODO- Text GetXML
 
         /// <summary>
         /// If name is invalid, throws an InvalidNameException.
@@ -603,6 +612,8 @@ namespace SS
         ///   value should be either a string, a double, or a SpreadsheetUtilities.FormulaError.
         /// </returns>
         public abstract object GetCellValue(String name);
+        //TODO - Test get cell value
+
 
     }
 }

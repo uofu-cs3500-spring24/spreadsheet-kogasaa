@@ -29,6 +29,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
+using System.Xml.Linq;
+using System.Xml.Serialization;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SS
@@ -44,7 +46,7 @@ namespace SS
         /// True if this spreadsheet has been modified since it was created or saved                  
         /// (whichever happened most recently); false otherwise.
         /// </summary>
-        public override bool Changed { get => throw new NotImplementedException(); protected set => throw new NotImplementedException(); }
+        public override bool Changed { get ; protected set; }
 
 
         /// <summary>
@@ -63,6 +65,8 @@ namespace SS
         {
             SpreadsheetCells = new Dictionary<string, Cell>();
             DependencyGraph = new DependencyGraph();
+            Changed = true;
+            //TODO - Test Changed
         }
 
         /// <summary>
@@ -72,8 +76,13 @@ namespace SS
         base(givenIsValid, givenNormalizor, VersionString)
         {
             //TODO - the json reader from a file and create teh spreadsheet cells and dependency graph
+            if(VersionString != GetSavedVersion(pathToFile))
+            {
+                throw new SpreadsheetReadWriteException("The Version Does not Match");
+            }
             SpreadsheetCells = new Dictionary<string, Cell>();
             DependencyGraph = new DependencyGraph();
+            Changed = true;
         }
 
         /// <summary>
@@ -155,7 +164,7 @@ namespace SS
         protected override IList<string> SetCellContents(string name, double number)
         {
             name = NormalizeAncCheckName(name);
-            Cell cell = new Cell(name, number);
+            Cell cell = new Cell(number);
             object oldCellValue = new object();
             if (SpreadsheetCells.ContainsKey(name))
             {
@@ -197,7 +206,7 @@ namespace SS
             {
                 throw new ArgumentNullException("The set text is null!");
             }
-            Cell cell = new Cell(name, text);
+            Cell cell = new Cell(text);
             object oldCellValue = new object();
             if (SpreadsheetCells.ContainsKey(name))
             {
@@ -251,7 +260,7 @@ namespace SS
             {
                 throw new ArgumentNullException("You are setting a null formula in the cell - " + name +" !");
             }
-            Cell cell = new Cell(name, formula);
+            Cell cell = new Cell(formula);
 
             //Check if it was "" cell
             bool ifItWasEmptyCell = false;
@@ -264,7 +273,7 @@ namespace SS
 
 
             //create or edit the formula cell
-            Cell oldCell = new Cell(name, oldCellValue);
+            Cell oldCell = new Cell(oldCellValue);
 
             if (SpreadsheetCells.ContainsKey(name))
             {
@@ -330,11 +339,13 @@ namespace SS
 
         public override IList<string> SetContentsOfCell(string name, string content)
         {
+            name = NormalizeAncCheckName(name);
+            Changed = true;
             if(double.TryParse(content, out double actualDouble))
             {
                 return SetCellContents(name, actualDouble);
             }
-            else if (content[0] == '=')
+            else if (content.Length > 0 && content[0] == '=')
             {
                 content = content.Substring(1);
                 Formula actualFormula = new Formula(content, Normalize, IsValid);
@@ -348,12 +359,25 @@ namespace SS
 
         public override string GetSavedVersion(string filename)
         {
-            throw new NotImplementedException();
+            try
+            {
+                XDocument doc = XDocument.Load(filename);
+                return (string)doc.Element(Version);
+            } catch
+            {
+                throw new SpreadsheetReadWriteException(filename + " Can not be found");
+            }
+            
         }
 
         public override void Save(string filename)
         {
-            throw new NotImplementedException();
+            Changed = false;
+            using(var writer = new StreamWriter(filename))
+            {
+                var spreadSheetSerializer = new XmlSerializer(typeof(Spreadsheet));
+                spreadSheetSerializer.Serialize(writer, this);
+            }
         }
 
         public override string GetXML()
@@ -407,8 +431,7 @@ namespace SS
     /// </summary>
     internal class Cell
     {
-        // the name of this cell
-        public string Name { get; set; }
+        
 
         // the value of this cell
         public object Value { get; set; }
@@ -418,10 +441,9 @@ namespace SS
         /// </summary>
         /// <param name="name">given name of the cell</param>
         /// <param name="value">given variabel for the cell, it should be double , string, or formula</param>
-        public Cell(string name, object value)
+        public Cell(object value)
         {
             Value = value;
-            Name = name;
         }
     }
 }

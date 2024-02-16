@@ -32,13 +32,13 @@ namespace SS
         public void TestGetNamesOfAllNonEmptyCells()
         {
             Spreadsheet Spreadsheet = new Spreadsheet();
-            Spreadsheet.SetCellContents("a1", 1);
-            Spreadsheet.SetCellContents("a2", new Formula("10+3"));
-            Spreadsheet.SetCellContents("a3", "Oh man this is a text");
-            Spreadsheet.SetCellContents("a1", 2);
+            Spreadsheet.SetContentsOfCell("a1", "1");
+            Spreadsheet.SetContentsOfCell("a2", "=10+3");
+            Spreadsheet.SetContentsOfCell("a3", "Oh man this is a text");
+            Spreadsheet.SetContentsOfCell("a1", "2");
             IEnumerable<string> result = Spreadsheet.GetNamesOfAllNonemptyCells();
             Assert.IsTrue(new HashSet<string> { "a1", "a2", "a3" }.SetEquals(result));
-            Spreadsheet.SetCellContents("a1", "");
+            Spreadsheet.SetContentsOfCell("a1", "");
             IEnumerable<string> result2 = Spreadsheet.GetNamesOfAllNonemptyCells();
             Assert.IsTrue(new HashSet<string> { "a2", "a3" }.SetEquals(result2));
         }
@@ -51,10 +51,10 @@ namespace SS
         public void TestGetNamesOfAllNonEmptyCellsInvalidName()
         {
             Spreadsheet Spreadsheet = new Spreadsheet();
-            Spreadsheet.SetCellContents("a1", 1);
-            Spreadsheet.SetCellContents("a2", new Formula("10+3"));
-            Spreadsheet.SetCellContents("a3", "Oh man this is a text");
-            Spreadsheet.SetCellContents("a1", 2);
+            Spreadsheet.SetContentsOfCell("a1", "1");
+            Spreadsheet.SetContentsOfCell("a2", "=10+3");
+            Spreadsheet.SetContentsOfCell("a3", "Oh man this is a text");
+            Spreadsheet.SetContentsOfCell("a1", "2");
             Spreadsheet.GetCellContents("999Wrong");
         }
 
@@ -65,17 +65,29 @@ namespace SS
         public void TestGetContentsOfCell()
         {
             Spreadsheet Spreadsheet = new Spreadsheet();
-            Spreadsheet.SetCellContents("a1", 1);
+            Spreadsheet.SetContentsOfCell("a1", "1");
             Assert.AreEqual(1.0, (double)Spreadsheet.GetCellContents("a1"));
-            Spreadsheet.SetCellContents("a2", new Formula("10+3"));
+            Spreadsheet.SetContentsOfCell("a2", "=10+3");
             Assert.AreEqual(new Formula("10+3"), (Formula)Spreadsheet.GetCellContents("a2"));
-            Spreadsheet.SetCellContents("a3", "Oh man this is a text");
+            Spreadsheet.SetContentsOfCell("a3", "Oh man this is a text");
             Assert.AreEqual("Oh man this is a text", (string)Spreadsheet.GetCellContents("a3"));
-            Spreadsheet.SetCellContents("a1", 2);
+            Spreadsheet.SetContentsOfCell("a1", "2");
             Assert.AreEqual(2.0, (double)Spreadsheet.GetCellContents("a1"));
 
-            // all cells should contains a empty string initially
-            Assert.AreEqual("", (string)Spreadsheet.GetCellContents("Infinite"));
+            
+        }
+
+
+
+        /// <summary>
+        /// This name is wrong
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestNameWrong()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet();
+            Assert.AreEqual("", spreadsheet.GetCellContents("Infinite").ToString());
         }
 
         /// <summary>
@@ -86,7 +98,7 @@ namespace SS
         public void TestSetDoubleWrong1()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
-            spreadsheet.SetCellContents("", 3.0);
+            spreadsheet.SetContentsOfCell("", "3.0");
         }
 
         /// <summary>
@@ -97,7 +109,7 @@ namespace SS
         public void TestSetDoubleWrong2()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
-            spreadsheet.SetCellContents(null, 3.0);
+            spreadsheet.SetContentsOfCell(null, "3.0");
         }
 
         /// <summary>
@@ -108,7 +120,7 @@ namespace SS
         public void TestSetDoubleWrong3()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
-            spreadsheet.SetCellContents("666", 3.0);
+            spreadsheet.SetContentsOfCell("666", "3.0");
         }
 
         /// <summary>
@@ -118,9 +130,9 @@ namespace SS
         public void TestSetDoubleRight()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
-            spreadsheet.SetCellContents("a1", 1.0);
-            spreadsheet.SetCellContents("a2", 2.0);
-            spreadsheet.SetCellContents("a3", 3.0);
+            spreadsheet.SetContentsOfCell("a1", "1.0");
+            spreadsheet.SetContentsOfCell("a2", "2.0");
+            spreadsheet.SetContentsOfCell("a3", "3.0");
             Assert.AreEqual(1.0, spreadsheet.GetCellContents("a1"));
             Assert.AreEqual(2.0, spreadsheet.GetCellContents("a2"));
             Assert.AreEqual(3.0, spreadsheet.GetCellContents("a3"));
@@ -138,7 +150,7 @@ namespace SS
         public void TestSetStringWrong1()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
-            spreadsheet.SetCellContents("", "w");
+            spreadsheet.SetContentsOfCell("", "w");
         }
 
         /// <summary>
@@ -149,7 +161,7 @@ namespace SS
         public void TestSetStringWrong2()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
-            spreadsheet.SetCellContents(null, "what");
+            spreadsheet.SetContentsOfCell(null, "what");
         }
 
         /// <summary>
@@ -160,19 +172,19 @@ namespace SS
         public void TestSetStringWrong3()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
-            spreadsheet.SetCellContents("666", "what");
+            spreadsheet.SetContentsOfCell("666", "what");
         }
 
         /// <summary>
         /// Set String Wrong4: the text is null
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [ExpectedException(typeof(NullReferenceException))]
         public void TestSetStringWrong4()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
             string nullable = null;
-            spreadsheet.SetCellContents("a1", nullable);
+            spreadsheet.SetContentsOfCell("a1", nullable);
         }
 
         /// <summary>
@@ -185,7 +197,7 @@ namespace SS
             HashSet<string> expectedNonNullCellNames = new HashSet<string>();
             for (int i = 0; i < 10; i++)
             {
-                spreadsheet.SetCellContents("a" + i, "string: " + i);
+                spreadsheet.SetContentsOfCell("a" + i, "string: " + i);
                 expectedNonNullCellNames.Add("a" + i);
             }
             Assert.IsTrue(expectedNonNullCellNames.SetEquals(spreadsheet.GetNamesOfAllNonemptyCells()));
@@ -205,7 +217,7 @@ namespace SS
         public void TestSetFormulaWrong1()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
-            spreadsheet.SetCellContents("", new Formula("1"));
+            spreadsheet.SetContentsOfCell("", "=1");
         }
 
         /// <summary>
@@ -216,7 +228,7 @@ namespace SS
         public void TestSetFormulaWrong2()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
-            spreadsheet.SetCellContents(null, new Formula("1"));
+            spreadsheet.SetContentsOfCell(null, "=1");
         }
 
         /// <summary>
@@ -227,19 +239,19 @@ namespace SS
         public void TestSetFormulaWrong3()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
-            spreadsheet.SetCellContents("666", new Formula("2"));
+            spreadsheet.SetContentsOfCell("666", "=2");
         }
 
         /// <summary>
         /// Set Formula Wrong4: the formula perameter is null
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [ExpectedException(typeof(NullReferenceException))]
         public void TestSetFormulaWrong4()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
-            Formula nullable = null;
-            spreadsheet.SetCellContents("a1", nullable);
+            string nullable = null;
+            spreadsheet.SetContentsOfCell("a1", nullable);
         }
 
         /// <summary>
@@ -252,9 +264,9 @@ namespace SS
             Spreadsheet spreadsheet = new Spreadsheet();
             for (int i = 0; i < 2; i++) 
             {
-                spreadsheet.SetCellContents("a"+i, new Formula("a" + (i + 1)));
+                spreadsheet.SetContentsOfCell("a"+i, "="+new Formula("a" + (i + 1)).ToString());
             }
-            spreadsheet.SetCellContents("a2", new Formula("a0"));
+            spreadsheet.SetContentsOfCell("a2", "=a0");
         }
 
         /// <summary>
@@ -267,7 +279,7 @@ namespace SS
             HashSet<string> expectedNonNullCellNames = new HashSet<string>();
             for (int i = 0; i < 10; i++)
             {
-                spreadsheet.SetCellContents("a" + i, new Formula(i+"*"+i));
+                spreadsheet.SetContentsOfCell("a" + i, "=" + new Formula(i + "*" + i).ToString());
                 expectedNonNullCellNames.Add("a" + i);
             }
             Assert.IsTrue(expectedNonNullCellNames.SetEquals((HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells()));
@@ -277,7 +289,7 @@ namespace SS
             }
             for (int i = 0;i < 5; i++)
             {
-                spreadsheet.SetCellContents("a" + i, "");
+                spreadsheet.SetContentsOfCell("a" + i, "");
                 expectedNonNullCellNames.Remove("a" + i);
             }
             Assert.IsTrue(expectedNonNullCellNames.SetEquals((HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells()));
@@ -293,7 +305,7 @@ namespace SS
             HashSet<string> expectedNonNullCellNames = new HashSet<string>();
             for (int i = 0; i < 10; i++)
             {
-                spreadsheet.SetCellContents("a" + i, new Formula("a" + (i+1)));
+                spreadsheet.SetContentsOfCell("a" + i, "=" + new Formula("a" + (i + 1)).ToString());
                 expectedNonNullCellNames.Add("a" + i);
             }
             Assert.IsTrue(expectedNonNullCellNames.SetEquals((HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells()));
@@ -303,15 +315,15 @@ namespace SS
             }
             for (int i = 0; i < 5; i++)
             {
-                spreadsheet.SetCellContents("a" + i, "");
+                spreadsheet.SetContentsOfCell("a" + i, "");
                 expectedNonNullCellNames.Remove("a" + i);
             }
             Assert.IsTrue(expectedNonNullCellNames.SetEquals((HashSet<string>)spreadsheet.GetNamesOfAllNonemptyCells()));
-            spreadsheet.SetCellContents("a10", new Formula("2*2*2"));
+            spreadsheet.SetContentsOfCell("a10", "=2*2*2");
             Assert.AreEqual(spreadsheet.GetCellContents("a5"), new Formula("a6"));
-            spreadsheet.SetCellContents("a10", 7.0);
+            spreadsheet.SetContentsOfCell("a10", "7.0");
             Assert.AreEqual(spreadsheet.GetCellContents("a6"), new Formula("a7"));
-            spreadsheet.SetCellContents("a10", "It is wrong but there is no formula format exception");
+            spreadsheet.SetContentsOfCell("a10", "It is wrong but there is no formula format exception");
             Assert.AreEqual(spreadsheet.GetCellContents("a8"), new Formula("a9"));
         }
 
@@ -327,15 +339,15 @@ namespace SS
             HashSet<string> expectedNonNullCellNames = new HashSet<string>();
             for (int i = 0; i < 10; i++)
             {
-                spreadsheet.SetCellContents("a" + i, new Formula("a" + (i + 1)));
+                spreadsheet.SetContentsOfCell("a" + i, "=" + new Formula("a" + (i + 1)).ToString());
                 expectedNonNullCellNames.Add("a" + i);
             }
             HashSet<string> result1 = new HashSet<string> {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9"};
-            Assert.IsTrue(spreadsheet.SetCellContents("a9", 11.0).SetEquals(result1));
-            Assert.IsTrue(spreadsheet.SetCellContents("a9", "what").SetEquals(result1));
-            Assert.IsTrue(spreadsheet.SetCellContents("a9", new Formula("1+21")).SetEquals(result1));
-            Assert.IsTrue(spreadsheet.SetCellContents("a9", new Formula("a11+a12")).SetEquals(result1));
-            Assert.IsTrue(spreadsheet.SetCellContents("a9", "cover Formula with string").SetEquals(result1));
+            Assert.IsTrue(spreadsheet.SetContentsOfCell("a9", "11.0").ToHashSet().SetEquals(result1));
+            Assert.IsTrue(spreadsheet.SetContentsOfCell("a9", "11.0").ToHashSet().SetEquals(result1));
+            Assert.IsTrue(spreadsheet.SetContentsOfCell("a9", "=1+21").ToHashSet().SetEquals(result1));
+            Assert.IsTrue(spreadsheet.SetContentsOfCell("a9", "=a11+a12").ToHashSet().SetEquals(result1));
+            Assert.IsTrue(spreadsheet.SetContentsOfCell("a9", "cover Formula with string").ToHashSet().SetEquals(result1));
             Assert.IsTrue(spreadsheet.GetNamesOfAllNonemptyCells().ToHashSet().SetEquals(expectedNonNullCellNames));
         }
 
@@ -346,14 +358,26 @@ namespace SS
         public void TestRecoverFormula2()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
-            spreadsheet.SetCellContents("a1", new Formula("b1+b2+b3+b4"));
+            spreadsheet.SetContentsOfCell("a1", "=" + new Formula("b1+b2+b3+b4").ToString());
             HashSet<string> expected = new HashSet<string> { "a1", "b4" };
                 
-            Assert.IsTrue(expected.SetEquals(spreadsheet.SetCellContents("b4", 9293.9)));
+            Assert.IsTrue(expected.SetEquals(spreadsheet.SetContentsOfCell("b4", "9293.9")));
 
-            spreadsheet.SetCellContents("a1", "string");
-            Assert.IsTrue(new HashSet<string> {"b4"}.SetEquals(spreadsheet.SetCellContents("b4", 9293.9)));
+            spreadsheet.SetContentsOfCell("a1", "string");
+            Assert.IsTrue(new HashSet<string> {"b4"}.SetEquals(spreadsheet.SetContentsOfCell("b4", "9293.9")));
 
+        }
+
+
+
+        /// <summary>
+        /// When SpreadSheet COnstractor version is not fit the version stored
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void ReadWriteWrong1()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet("TestConFileNotMatch.xml", n=>true, n=>n, "Wrong!");
         }
     }
 }
