@@ -612,8 +612,7 @@ namespace SS
         ///   value should be either a string, a double, or a SpreadsheetUtilities.FormulaError.
         /// </returns>
         public abstract object GetCellValue(String name);
-        //TODO - Test get cell value
-
+        
 
     }
 }

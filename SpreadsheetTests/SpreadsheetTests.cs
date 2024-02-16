@@ -406,5 +406,37 @@ namespace SS
             spreadsheet.Save("TestWrite1.xml");
             Assert.AreEqual("TheSpecificVersion", spreadsheet.GetSavedVersion("TestWrite1.xml"));
         }
+
+        /// <summary>
+        /// Test GetVersion
+        /// </summary>
+        [TestMethod]
+        public void testGetCellValue1()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet(n => true, n => n, "TheSpecificVersion");
+            spreadsheet.SetContentsOfCell("a1", "34");
+            spreadsheet.SetContentsOfCell("a2", "=a1+a3");
+            spreadsheet.SetContentsOfCell("a6", "=a1+34");
+            spreadsheet.SetContentsOfCell("a4", "stringgggg");
+            Assert.AreEqual("stringgggg", spreadsheet.GetCellValue("a4"));
+            Assert.AreEqual(34.0, spreadsheet.GetCellValue("a1"));
+            Assert.IsTrue(spreadsheet.GetCellValue("a2").GetType() == typeof(FormulaError));
+            Assert.AreEqual(68.0, spreadsheet.GetCellValue("a6"));
+
+            try
+            {
+                spreadsheet.SetContentsOfCell("b1", "=b2");
+                spreadsheet.SetContentsOfCell("b2", "=b3");
+                spreadsheet.SetContentsOfCell("b3", "=b1");
+            }
+            catch (CircularException e)
+            {
+                Assert.AreEqual("", spreadsheet.GetCellValue("b1"));
+                Assert.AreEqual("", spreadsheet.GetCellValue("b2"));
+                Assert.AreEqual("", spreadsheet.GetCellValue("b3"));
+            }
+
+
+        }
     }
 }

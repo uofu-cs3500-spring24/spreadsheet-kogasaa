@@ -361,19 +361,58 @@ namespace SS
             }
         }
 
+        //Let it just return version
         public override string GetSavedVersion(string filename)
         {
+            string ?version = null;
             try
             {
-                XDocument doc = XDocument.Load(filename);
-                return doc.Element("Version").Value;
-            } catch
+                
+                using (XmlReader reader = XmlReader.Create(filename))
+                {
+                    while (reader.Read()) ;
+                    {
+                        string name = "";
+                        string content = "";
+                        if (reader.IsStartElement())
+                        {
+                            
+                            switch (reader.Name)
+                            {
+                                case "Spreadsheet":
+                                    version = reader[Version];
+                                    break;
+                                case "Name":
+                                    reader.Read();
+                                    name = reader.Value;
+                                    break;
+                                case "Content":
+                                    reader.Read();
+                                    content = reader.Value;
+                                    break;
+                            }   
+                        }
+                        try
+                        {
+                            SetCellContents(name, content);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new SpreadsheetReadWriteException("There is a problem when read a xml file: " + e.Message);
+                        }
+                        
+                    }
+                }
+            } catch (Exception e)
             {
                 throw new SpreadsheetReadWriteException(filename + " Can not be found");
             }
+
+            return version;
             
         }
 
+        //make a total new writer, and put in a file.s
         public override void Save(string filename)
         {
             string XMLFormat = GetXML();
@@ -386,27 +425,28 @@ namespace SS
         public override string GetXML()
         {
             XmlWriterSettings settings = new XmlWriterSettings();
-            settings.OmitXmlDeclaration = true;
             settings.Indent = true;
             settings.IndentChars = "  ";
-            StringBuilder sb = new StringBuilder();
+            StringWriter stringWriter = new StringWriter();
 
 
-            using (XmlWriter writer = XmlWriter.Create(sb, settings))
+            using (XmlWriter writer = XmlWriter.Create(stringWriter, settings))
             {
+                
+
                 writer.WriteStartDocument();
                 writer.WriteStartElement("Spreadsheet");
 
-                writer.WriteStartElement("Version", Version);
-                writer.WriteEndElement();
+                writer.WriteAttributeString("Version", Version);
 
 
                 foreach (string cellName in GetNamesOfAllNonemptyCells())
                 {
-                    writer.WriteStartElement("cell");
-                    writer.WriteAttributeString("name", cellName);
-                    writer.WriteAttributeString("content", SpreadsheetCells[cellName].Value.ToString());
+                    writer.WriteStartElement("Cell");
+                    writer.WriteElementString("Name", cellName);
+                    writer.WriteElementString("Content", SpreadsheetCells[cellName].Value.ToString());
                     writer.WriteEndElement();
+                    writer.Flush();
                 }
 
                 
@@ -414,7 +454,7 @@ namespace SS
                 writer.WriteEndDocument();
 
             }
-            return sb.ToString();
+            return stringWriter.ToString();
         }
 
         //TODO - Test GetCellValue
