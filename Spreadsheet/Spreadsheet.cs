@@ -22,6 +22,7 @@
 using SpreadsheetUtilities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -331,11 +332,17 @@ namespace SS
         {
             if(double.TryParse(content, out double actualDouble))
             {
-                SetCellContents(name, actualDouble);
-            }else if (content[0] == '=')
+                return SetCellContents(name, actualDouble);
+            }
+            else if (content[0] == '=')
             {
                 content = content.Substring(1);
-                Formula actualFormula = new Formula(content);
+                Formula actualFormula = new Formula(content, Normalize, IsValid);
+                return SetCellContents(name, actualFormula);
+            }
+            else
+            {
+                return SetCellContents(name, content);
             }
         }
 
@@ -356,7 +363,41 @@ namespace SS
 
         public override object GetCellValue(string name)
         {
-            throw new NotImplementedException();
+            if (SpreadsheetCells[name].Value.GetType() == typeof(Formula))
+            {
+                Formula cellFormula = (Formula)SpreadsheetCells[name].Value;
+                return cellFormula.Evaluate(LookUp);
+            }
+            else
+            {
+                try
+                {
+                    return SpreadsheetCells[name].Value;
+                }
+                catch (Exception)
+                {
+                    return "";
+                }
+                
+            }
+        }
+
+        private double LookUp(string name)
+        {
+            string rightFormatName = NormalizeAncCheckName(name);
+            if (!SpreadsheetCells.ContainsKey(rightFormatName) || SpreadsheetCells[rightFormatName].Value.GetType() == typeof(string))
+            {
+                throw new ArgumentException("You are take a string in the caculator");
+            }
+            else if (SpreadsheetCells[rightFormatName].Value.GetType() == typeof(double))
+            {
+                return (Double)SpreadsheetCells[rightFormatName].Value;
+            }
+            else
+            {
+                Formula cellFormula = (Formula)SpreadsheetCells[name].Value;
+                return (double)cellFormula.Evaluate(LookUp);
+            }
         }
     }
 
