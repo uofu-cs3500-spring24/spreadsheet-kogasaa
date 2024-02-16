@@ -26,9 +26,11 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
+using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -37,7 +39,9 @@ namespace SS
 {
     public class Spreadsheet : AbstractSpreadsheet
     {
+        [JsonInclude]
         private Dictionary<string, Cell> SpreadsheetCells;
+
         private DependencyGraph DependencyGraph;
         private static string correctNamePattern = @"^[a-zA-Z]+[0-9]+$";
         
@@ -164,7 +168,7 @@ namespace SS
         protected override IList<string> SetCellContents(string name, double number)
         {
             name = NormalizeAncCheckName(name);
-            Cell cell = new Cell(number);
+            Cell cell = new Cell(name, number);
             object oldCellValue = new object();
             if (SpreadsheetCells.ContainsKey(name))
             {
@@ -206,7 +210,7 @@ namespace SS
             {
                 throw new ArgumentNullException("The set text is null!");
             }
-            Cell cell = new Cell(text);
+            Cell cell = new Cell(name, text);
             object oldCellValue = new object();
             if (SpreadsheetCells.ContainsKey(name))
             {
@@ -260,7 +264,7 @@ namespace SS
             {
                 throw new ArgumentNullException("You are setting a null formula in the cell - " + name +" !");
             }
-            Cell cell = new Cell(formula);
+            Cell cell = new Cell(name, formula);
 
             //Check if it was "" cell
             bool ifItWasEmptyCell = false;
@@ -273,7 +277,7 @@ namespace SS
 
 
             //create or edit the formula cell
-            Cell oldCell = new Cell(oldCellValue);
+            Cell oldCell = new Cell(name, oldCellValue);
 
             if (SpreadsheetCells.ContainsKey(name))
             {
@@ -362,7 +366,7 @@ namespace SS
             try
             {
                 XDocument doc = XDocument.Load(filename);
-                return (string)doc.Element(Version);
+                return doc.Element("Version").Value;
             } catch
             {
                 throw new SpreadsheetReadWriteException(filename + " Can not be found");
@@ -372,19 +376,48 @@ namespace SS
 
         public override void Save(string filename)
         {
-            Changed = false;
-            using(var writer = new StreamWriter(filename))
+            string XMLFormat = GetXML();
+            using (StreamWriter outputFile = new StreamWriter(filename))
             {
-                var spreadSheetSerializer = new XmlSerializer(typeof(Spreadsheet));
-                spreadSheetSerializer.Serialize(writer, this);
+                outputFile.WriteLine(XMLFormat);
             }
         }
 
         public override string GetXML()
         {
-            throw new NotImplementedException();
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.OmitXmlDeclaration = true;
+            settings.Indent = true;
+            settings.IndentChars = "  ";
+            StringBuilder sb = new StringBuilder();
+
+
+            using (XmlWriter writer = XmlWriter.Create(sb, settings))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("Spreadsheet");
+
+                writer.WriteStartElement("Version", Version);
+                writer.WriteEndElement();
+
+
+                foreach (string cellName in GetNamesOfAllNonemptyCells())
+                {
+                    writer.WriteStartElement("cell");
+                    writer.WriteAttributeString("name", cellName);
+                    writer.WriteAttributeString("content", SpreadsheetCells[cellName].Value.ToString());
+                    writer.WriteEndElement();
+                }
+
+                
+                writer.WriteEndElement(); 
+                writer.WriteEndDocument();
+
+            }
+            return sb.ToString();
         }
 
+        //TODO - Test GetCellValue
         public override object GetCellValue(string name)
         {
             if (SpreadsheetCells[name].Value.GetType() == typeof(Formula))
@@ -432,7 +465,7 @@ namespace SS
     internal class Cell
     {
         
-
+        public string Name { get; set; }
         // the value of this cell
         public object Value { get; set; }
 
@@ -441,9 +474,10 @@ namespace SS
         /// </summary>
         /// <param name="name">given name of the cell</param>
         /// <param name="value">given variabel for the cell, it should be double , string, or formula</param>
-        public Cell(object value)
+        public Cell(string name, object value)
         {
             Value = value;
+            Name = name;
         }
     }
 }

@@ -379,5 +379,32 @@ namespace SS
         {
             Spreadsheet spreadsheet = new Spreadsheet("TestConFileNotMatch.xml", n=>true, n=>n, "Wrong!");
         }
+
+        /// <summary>
+        /// create a xml file
+        /// </summary>
+        [TestMethod]
+        public void WriteAXML1()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet(n => true, n => n, "TheSpecificVersion");
+            spreadsheet.SetContentsOfCell("a1", "34");
+            spreadsheet.SetContentsOfCell("a2", "=a1+a3");
+            spreadsheet.SetContentsOfCell("a4", "stringgggg");
+            spreadsheet.Save("TestWrite1.xml");
+        }
+
+        /// <summary>
+        /// Test GetVersion
+        /// </summary>
+        [TestMethod]
+        public void GetVersion1()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet(n => true, n => n, "TheSpecificVersion");
+            spreadsheet.SetContentsOfCell("a1", "34");
+            spreadsheet.SetContentsOfCell("a2", "=a1+a3");
+            spreadsheet.SetContentsOfCell("a4", "stringgggg");
+            spreadsheet.Save("TestWrite1.xml");
+            Assert.AreEqual("TheSpecificVersion", spreadsheet.GetSavedVersion("TestWrite1.xml"));
+        }
     }
 }
