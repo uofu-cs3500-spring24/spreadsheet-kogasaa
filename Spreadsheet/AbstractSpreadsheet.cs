@@ -588,14 +588,14 @@ namespace SS
         /// SpreadsheetReadWriteException with an explanatory message.
         /// </summary>
         public abstract void Save(String filename);
-        //TODO - Test Save
+        
 
         /// <summary>
         ///   Return an XML representation of the spreadsheet's contents
         /// </summary>
         /// <returns> contents in XML form </returns>
         public abstract string GetXML();
-        //TODO- Text GetXML
+        
 
         /// <summary>
         /// If name is invalid, throws an InvalidNameException.

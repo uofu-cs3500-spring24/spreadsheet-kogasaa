@@ -62,8 +62,19 @@ namespace SS
         }
 
         /// <summary>
-        /// Construct a empty spreadsheet
+        /// Constructs an abstract spreadsheet by recording its variable validity test,
+        /// its normalization method, and its version information.  
         /// </summary>
+        /// 
+        /// <remarks>
+        ///   The variable validity test is used throughout to determine whether a string that consists of 
+        ///   one or more letters followed by one or more digits is a valid cell name.  The variable
+        ///   equality test should be used throughout to determine whether two variables are equal.
+        /// </remarks>
+        /// 
+        /// <param name="isValid">   defines what valid variables look like for the application</param>
+        /// <param name="normalize"> defines a normalization procedure to be applied to all valid variable strings</param>
+        /// <param name="version">   defines the version of the spreadsheet (should it be saved)</param>
         public Spreadsheet(Func<string, bool> givenIsValid, Func<string, string> givenNormalizor, string VersionString):
         base(givenIsValid, givenNormalizor, VersionString)
         {
@@ -79,14 +90,47 @@ namespace SS
         public Spreadsheet(string pathToFile, Func<string, bool> givenIsValid, Func<string, string> givenNormalizor, string VersionString):
         base(givenIsValid, givenNormalizor, VersionString)
         {
+            SpreadsheetCells = new Dictionary<string, Cell>();
+            DependencyGraph = new DependencyGraph();
+
             //TODO - the json reader from a file and create teh spreadsheet cells and dependency graph
             if(VersionString != GetSavedVersion(pathToFile))
             {
                 throw new SpreadsheetReadWriteException("The Version Does not Match");
             }
-            SpreadsheetCells = new Dictionary<string, Cell>();
-            DependencyGraph = new DependencyGraph();
-            Changed = true;
+            
+                using (XmlReader reader = XmlReader.Create(pathToFile))
+                {
+                    while (reader.Read())
+                    {
+                        string eachNewCellName = "";
+                        string eachNewCellContent = "";
+                        bool canCreateANewCell = false;
+                        if (reader.IsStartElement())
+                        {
+
+                            switch (reader.Name)
+                            {
+                                case "Name":
+                                    reader.Read();
+                                    eachNewCellName = reader.Value;
+                                    reader.Read();
+                                    reader.Read();
+                                    reader.Read();
+                                    reader.Read();
+                                    eachNewCellContent = reader.Value;
+                                    canCreateANewCell = true;
+                                    break;
+                            }
+                        }
+                        if (canCreateANewCell)
+                        {
+                            SetContentsOfCell(eachNewCellName, eachNewCellContent);
+                        }
+
+                    }
+                }
+
         }
 
         /// <summary>
@@ -111,7 +155,7 @@ namespace SS
         public override object GetCellContents(string name)
         {
             //TODO figure out if the parameter should be normalized or not
-            name = NormalizeAncCheckName(name);
+            name = NormalizeAndCheckName(name);
             if (SpreadsheetCells.ContainsKey(name))
             {
                 Cell targetCell = SpreadsheetCells[name];
@@ -130,7 +174,7 @@ namespace SS
         /// <param name="name">name of Cell</param>
         /// <exception cref="InvalidNameException"> If name is null or invalid
         /// Throw this exception</exception>
-        private string NormalizeAncCheckName(string name)
+        private string NormalizeAndCheckName(string name)
         {
             name = Normalize(name);
             if (IsValid(name))
@@ -167,7 +211,7 @@ namespace SS
         /// </returns>
         protected override IList<string> SetCellContents(string name, double number)
         {
-            name = NormalizeAncCheckName(name);
+            name = NormalizeAndCheckName(name);
             Cell cell = new Cell(name, number);
             object oldCellValue = new object();
             if (SpreadsheetCells.ContainsKey(name))
@@ -205,7 +249,7 @@ namespace SS
         /// </returns>
         protected override IList<string> SetCellContents(string name, string text)
         {
-            name = NormalizeAncCheckName(name);
+            name = NormalizeAndCheckName(name);
             if(text == null)
             {
                 throw new ArgumentNullException("The set text is null!");
@@ -255,7 +299,7 @@ namespace SS
         protected override IList<string> SetCellContents(string name, Formula formula)
         {
             //Check formula and name correction
-            name = NormalizeAncCheckName(name);
+            name = NormalizeAndCheckName(name);
             try
             {
                 formula.Equals(null);
@@ -297,7 +341,7 @@ namespace SS
                 DeletePreviousDependees(name, oldCellValue);
                 return changedCells.ToList();
             }
-            catch(CircularException e)
+            catch
             {
                 SpreadsheetCells[name] = oldCell;
                 DependencyGraph.ReplaceDependees(name, oldDependees);
@@ -308,6 +352,9 @@ namespace SS
                 throw new CircularException();
             }
         }
+
+
+
 
         /// <summary>
         /// THis is a helper method used in the setcellcontent (double version and string 
@@ -341,9 +388,13 @@ namespace SS
         }
 
 
+
+
+
+
         public override IList<string> SetContentsOfCell(string name, string content)
         {
-            name = NormalizeAncCheckName(name);
+            name = NormalizeAndCheckName(name);
             Changed = true;
             if(double.TryParse(content, out double actualDouble))
             {
@@ -361,6 +412,10 @@ namespace SS
             }
         }
 
+
+
+
+
         //Let it just return version
         public override string GetSavedVersion(string filename)
         {
@@ -370,35 +425,16 @@ namespace SS
                 
                 using (XmlReader reader = XmlReader.Create(filename))
                 {
-                    while (reader.Read()) ;
+                    while (reader.Read()) 
                     {
-                        string name = "";
-                        string content = "";
                         if (reader.IsStartElement())
                         {
                             
                             switch (reader.Name)
                             {
                                 case "Spreadsheet":
-                                    version = reader[Version];
-                                    break;
-                                case "Name":
-                                    reader.Read();
-                                    name = reader.Value;
-                                    break;
-                                case "Content":
-                                    reader.Read();
-                                    content = reader.Value;
-                                    break;
-                            }   
-                        }
-                        try
-                        {
-                            SetCellContents(name, content);
-                        }
-                        catch (Exception e)
-                        {
-                            throw new SpreadsheetReadWriteException("There is a problem when read a xml file: " + e.Message);
+                                    version = reader["Version"];
+                                    return version;                            }   
                         }
                         
                     }
@@ -412,16 +448,47 @@ namespace SS
             
         }
 
+
+
+
+
         //make a total new writer, and put in a file.s
         public override void Save(string filename)
         {
-            string XMLFormat = GetXML();
-            using (StreamWriter outputFile = new StreamWriter(filename))
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "  ";
+
+            using (XmlWriter writer = XmlWriter.Create(filename, settings))
             {
-                outputFile.WriteLine(XMLFormat);
+
+
+                writer.WriteStartDocument();
+                writer.WriteStartElement("Spreadsheet");
+
+                writer.WriteAttributeString("Version", Version);
+
+
+                foreach (string cellName in GetNamesOfAllNonemptyCells())
+                {
+                    writer.WriteStartElement("Cell");
+                    writer.WriteElementString("Name", cellName);
+                    writer.WriteElementString("Content", SpreadsheetCells[cellName].GetContentString());
+                    writer.WriteEndElement();
+                    writer.Flush();
+                }
+
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+
             }
         }
 
+
+
+
+        //TODO - Figure out that we can save a XML in a file in method save, but why we still need the XML for get
         public override string GetXML()
         {
             XmlWriterSettings settings = new XmlWriterSettings();
@@ -444,7 +511,7 @@ namespace SS
                 {
                     writer.WriteStartElement("Cell");
                     writer.WriteElementString("Name", cellName);
-                    writer.WriteElementString("Content", SpreadsheetCells[cellName].Value.ToString());
+                    writer.WriteElementString("Content", SpreadsheetCells[cellName].GetContentString());
                     writer.WriteEndElement();
                     writer.Flush();
                 }
@@ -457,10 +524,26 @@ namespace SS
             return stringWriter.ToString();
         }
 
-        //TODO - Test GetCellValue
+
+
+
+        /// <summary>
+        /// If name is invalid, throws an InvalidNameException.
+        /// </summary>
+        ///
+        /// <exception cref="InvalidNameException"> 
+        ///   If the name is invalid, throw an InvalidNameException
+        /// </exception>
+        /// 
+        /// <param name="name"> The name of the cell that we want the value of (will be normalized)</param>
+        /// 
+        /// <returns>
+        ///   Returns the value (as opposed to the contents) of the named cell.  The return
+        ///   value should be either a string, a double, or a SpreadsheetUtilities.FormulaError.
+        /// </returns>
         public override object GetCellValue(string name)
         {
-            if (SpreadsheetCells[name].Value.GetType() == typeof(Formula))
+            if (SpreadsheetCells.ContainsKey(name) && SpreadsheetCells[name].Value.GetType() == typeof(Formula))
             {
                 Formula cellFormula = (Formula)SpreadsheetCells[name].Value;
                 return cellFormula.Evaluate(LookUp);
@@ -471,7 +554,7 @@ namespace SS
                 {
                     return SpreadsheetCells[name].Value;
                 }
-                catch (Exception)
+                catch(KeyNotFoundException)
                 {
                     return "";
                 }
@@ -479,9 +562,12 @@ namespace SS
             }
         }
 
+
+
+
         private double LookUp(string name)
         {
-            string rightFormatName = NormalizeAncCheckName(name);
+            string rightFormatName = NormalizeAndCheckName(name);
             if (!SpreadsheetCells.ContainsKey(rightFormatName) || SpreadsheetCells[rightFormatName].Value.GetType() == typeof(string))
             {
                 throw new ArgumentException("You are take a string in the caculator");
@@ -518,6 +604,19 @@ namespace SS
         {
             Value = value;
             Name = name;
+        }
+
+        public string GetContentString()
+        {
+            if(Value.GetType() == typeof(Formula))
+            {
+                Formula formula = (Formula)Value;
+                return "="+ formula.ToString();
+            }
+            else
+            {
+                return Value.ToString();
+            }
         }
     }
 }

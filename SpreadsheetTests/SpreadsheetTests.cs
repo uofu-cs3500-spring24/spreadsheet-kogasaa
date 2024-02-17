@@ -380,6 +380,8 @@ namespace SS
             Spreadsheet spreadsheet = new Spreadsheet("TestConFileNotMatch.xml", n=>true, n=>n, "Wrong!");
         }
 
+        
+
         /// <summary>
         /// create a xml file
         /// </summary>
@@ -431,12 +433,48 @@ namespace SS
             }
             catch (CircularException e)
             {
-                Assert.AreEqual("", spreadsheet.GetCellValue("b1"));
-                Assert.AreEqual("", spreadsheet.GetCellValue("b2"));
+                //they should be "" because there is a circular expectation
+                Assert.IsTrue(spreadsheet.GetCellValue("b1").GetType() == typeof(FormulaError));
+                Assert.IsTrue(spreadsheet.GetCellValue("b2").GetType() == typeof(FormulaError));
                 Assert.AreEqual("", spreadsheet.GetCellValue("b3"));
             }
-
-
         }
+
+
+        /// <summary>
+        /// Test ReadFileConstructor
+        /// </summary>
+        [TestMethod]
+        public void testReadFileConstructor1()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet("TestWrite1.xml",n => true, n => n, "TheSpecificVersion");
+            Assert.AreEqual(34.0, spreadsheet.GetCellValue("a1"));
+            Assert.AreEqual(34.0, spreadsheet.GetCellContents("a1"));
+            Assert.IsTrue(spreadsheet.GetCellValue("a2").GetType() == typeof(FormulaError));
+            Assert.AreEqual(new Formula("a1+a3"), spreadsheet.GetCellContents("a2"));
+            Assert.AreEqual("stringgggg", spreadsheet.GetCellValue("a4"));
+            Assert.AreEqual("stringgggg", spreadsheet.GetCellContents("a4"));
+        }
+
+
+        /// <summary>
+        /// Test GetXML()
+        /// </summary>
+        [TestMethod]
+        public void testGetXML()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet("TestWrite1.xml", n => true, n => n, "TheSpecificVersion");
+            string expectedXML = "<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<Spreadsheet Version=\"TheSpecificVersion\">\r\n  <Cell>\r\n    <Name>a1</Name>\r\n    <Content>34</Content>\r\n  </Cell>\r\n  <Cell>\r\n    <Name>a2</Name>\r\n    <Content>=a1+a3</Content>\r\n  </Cell>\r\n  <Cell>\r\n    <Name>a4</Name>\r\n    <Content>stringgggg</Content>\r\n  </Cell>\r\n</Spreadsheet>";
+            Assert.AreEqual(expectedXML, spreadsheet.GetXML());
+        }
+
+        //拿个ipad把
+        //abstract spreadsheet的所有comment和
+        //canvas Instruction对照，还有
+        //所有piazza和
+        //todo
+
+        //最后再搞comments 和 Readme
+
     }
 }
