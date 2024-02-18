@@ -409,9 +409,9 @@ namespace SS
 
 
         /// <summary>
-        /// A helper for the GetCellsToRecalculate method.
-        /// 
-        ///   -- You should fully comment what is going on below using XML tags as appropriate --
+        /// This method using recurtion for keeping using visit and get direct Dependents method to 
+        /// Find all the direct and indirect dependent cells in the dependency graph and put them in 
+        /// the visited Set
         /// </summary>
         private void Visit(String start, String name, ISet<String> visited, LinkedList<String> changed)
         {

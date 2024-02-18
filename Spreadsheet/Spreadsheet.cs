@@ -39,9 +39,7 @@ namespace SS
 {
     public class Spreadsheet : AbstractSpreadsheet
     {
-        [JsonInclude]
         private Dictionary<string, Cell> SpreadsheetCells;
-
         private DependencyGraph DependencyGraph;
         private static string correctNamePattern = @"^[a-zA-Z]+[0-9]+$";
         
@@ -57,7 +55,7 @@ namespace SS
         /// Construct a empty spreadsheet
         /// </summary>
         public Spreadsheet():
-        this(n => true, n => n, "Default")
+        this(n => true, n => n, "default")
         {
         }
 
@@ -80,8 +78,7 @@ namespace SS
         {
             SpreadsheetCells = new Dictionary<string, Cell>();
             DependencyGraph = new DependencyGraph();
-            Changed = true;
-            //TODO - Test Changed
+            Changed = false;
         }
 
         /// <summary>
@@ -98,7 +95,9 @@ namespace SS
             {
                 throw new SpreadsheetReadWriteException("The Version Does not Match");
             }
-            
+
+            try
+            {
                 using (XmlReader reader = XmlReader.Create(pathToFile))
                 {
                     while (reader.Read())
@@ -127,10 +126,14 @@ namespace SS
                         {
                             SetContentsOfCell(eachNewCellName, eachNewCellContent);
                         }
-
                     }
                 }
-
+            }
+            catch (Exception e)
+            {
+                throw new SpreadsheetReadWriteException(e.Message);
+            }
+            Changed = false;
         }
 
         /// <summary>
@@ -287,6 +290,7 @@ namespace SS
         /// <exception cref="InvalidNameException"
         /// it will throw a invalidNameException when the name is invalid or null
         /// </exception>
+        /// 
         /// <exception cref="ArgumentNullException"
         /// it will throw a ArugmentNullException when the formula is null
         /// </exception>
@@ -300,15 +304,16 @@ namespace SS
         {
             //Check formula and name correction
             name = NormalizeAndCheckName(name);
-            try
+            foreach(string variable in formula.GetVariables())
             {
-                formula.Equals(null);
+                NormalizeAndCheckName(variable);
             }
-            catch
+            if(formula.Equals(null))
             {
                 throw new ArgumentNullException("You are setting a null formula in the cell - " + name +" !");
             }
             Cell cell = new Cell(name, formula);
+
 
             //Check if it was "" cell
             bool ifItWasEmptyCell = false;
@@ -436,12 +441,11 @@ namespace SS
                                     version = reader["Version"];
                                     return version;                            }   
                         }
-                        
                     }
                 }
             } catch (Exception e)
             {
-                throw new SpreadsheetReadWriteException(filename + " Can not be found");
+                throw new SpreadsheetReadWriteException(filename + " has this exception: " + e.Message);
             }
 
             return version;
@@ -458,6 +462,7 @@ namespace SS
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
             settings.IndentChars = "  ";
+            Changed = false;
 
             using (XmlWriter writer = XmlWriter.Create(filename, settings))
             {

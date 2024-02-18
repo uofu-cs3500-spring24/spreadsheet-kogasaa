@@ -523,7 +523,7 @@ namespace SpreadsheetUtilities
         {
             if(obj is Formula)
             {
-                return this.ToString() == ((Formula)obj).ToString();
+                return normalizedFormula == ((Formula)obj).ToString();
             }
             else
             {
@@ -558,7 +558,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public override int GetHashCode()
         {
-            return this.ToString().GetHashCode();
+            return normalizedFormula.GetHashCode();
         }
 
         /// <summary>

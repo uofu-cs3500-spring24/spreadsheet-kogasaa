@@ -18,6 +18,8 @@
 /// </summary>
 
 using SpreadsheetUtilities;
+using System.Threading.Channels;
+using System.Xml;
 
 namespace SS
 {
@@ -188,10 +190,10 @@ namespace SS
         }
 
         /// <summary>
-        /// Set String Right: It will set string rightly and without any exception
+        /// Set String Right1: It will set string rightly and without any exception
         /// </summary>
         [TestMethod]
-        public void TestSetStringRight()
+        public void TestSetStringRight1()
         {
             Spreadsheet spreadsheet = new Spreadsheet();
             HashSet<string> expectedNonNullCellNames = new HashSet<string>();
@@ -205,6 +207,21 @@ namespace SS
             {
                 Assert.AreEqual("string: "+i, spreadsheet.GetCellContents("a"+i));
             }
+        }
+
+        /// <summary>
+        /// Set String Right2: Test if get cell recalculate right
+        /// 
+        /// </summary>
+        [TestMethod]
+        public void TestSetStringRight2()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet();
+            spreadsheet.SetContentsOfCell("a1", "=1");
+            spreadsheet.SetContentsOfCell("a2", "=1+a1");
+            spreadsheet.SetContentsOfCell("a3", "=2+a2");
+            List<string> reCalCulatedCellNames = spreadsheet.SetContentsOfCell("a1", "Anni are you ok?").ToList<string>();
+            Assert.IsTrue(reCalCulatedCellNames.SequenceEqual(new List<string>{ "a1", "a2", "a3"}));
         }
 
 
@@ -371,16 +388,181 @@ namespace SS
 
 
         /// <summary>
-        /// When SpreadSheet COnstractor version is not fit the version stored
+        /// When SpreadSheet Constructor can not find a file
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         public void ReadWriteWrong1()
         {
-            Spreadsheet spreadsheet = new Spreadsheet("TestConFileNotMatch.xml", n=>true, n=>n, "Wrong!");
+            Spreadsheet spreadsheet = new Spreadsheet("TestConFileNotMatch.xml", n=>true, n=>n, "This can not found!");
         }
 
-        
+        /// <summary>
+        /// When SpreadSheet COnstractor version is not fit the version stored
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void ReadWriteWrong2()
+        {
+            Spreadsheet SPWrong = new Spreadsheet(n => true, n => n, "OwO");
+            SPWrong.Save("TestVersionWrong.xml");
+            Spreadsheet spreadsheet = new Spreadsheet("TestVersionWrong.xml", n => true, n => n, "O^O");
+        }
+
+        /// <summary>
+        /// When this is a file with no word inside it
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void ReadWriteWrong3()
+        {
+            using (File.Create("Nothing.xml")) 
+            { 
+                // I learn how to create a empty file from stack over flow
+            }
+            Spreadsheet spreadsheet = new Spreadsheet("Nothing.xml", n => true, n => n, "O^O");
+        }
+
+        /// <summary>
+        /// When it is a xml file but it has no Version element inside it
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void ReadWriteWrong4()
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "  ";
+
+            using (XmlWriter writer = XmlWriter.Create("NoVersionInside.xml", settings))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("SpreadsheetOOOO");
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+
+            }
+            Spreadsheet spreadsheet = new Spreadsheet("NoVersionInside.xml", n => true, n => n, "O^O");
+        }
+
+        /// <summary>
+        /// When it is a xml file but it has wrong cell name inside it
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void ReadWriteWrong5()
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "  ";
+
+            using (XmlWriter writer = XmlWriter.Create("wrong2.xml", settings))
+            {
+
+
+                writer.WriteStartDocument();
+                writer.WriteStartElement("Spreadsheet");
+
+                writer.WriteAttributeString("Version", "wrong2");
+
+
+                for (int i = 0; i < 10; i++)
+                {
+                    writer.WriteStartElement("Cell");
+                    writer.WriteElementString("Name", i + " wrong2");
+                    writer.WriteElementString("Content", "wrong2");
+                    writer.WriteEndElement();
+                    writer.Flush();
+                }
+
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+
+            }
+            Spreadsheet spreadsheet = new Spreadsheet("wrong2.xml", n => true, n => n, "wrong2");
+        }
+
+        /// <summary>
+        /// When it is a xml file but it has wrong formula inside it
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void ReadWriteWrong6()
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "  ";
+
+            using (XmlWriter writer = XmlWriter.Create("wrong3.xml", settings))
+            {
+
+
+                writer.WriteStartDocument();
+                writer.WriteStartElement("Spreadsheet");
+
+                writer.WriteAttributeString("Version", "wrong3");
+
+
+                for (int i = 0; i < 10; i++)
+                {
+                    writer.WriteStartElement("Cell");
+                    writer.WriteElementString("Name", "wrongThree"+ i);
+                    writer.WriteElementString("Content", "=q+sksaldkfjals");
+                    writer.WriteEndElement();
+                    writer.Flush();
+                }
+
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+
+            }
+            Spreadsheet spreadsheet = new Spreadsheet("wrong3.xml", n => true, n => n, "wrong3");
+        }
+
+        /// <summary>
+        /// When it is a xml file but it has circular dependency inside it
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void ReadWriteWrong7()
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "  ";
+
+            using (XmlWriter writer = XmlWriter.Create("wrong4.xml", settings))
+            {
+
+
+                writer.WriteStartDocument();
+                writer.WriteStartElement("Spreadsheet");
+
+                writer.WriteAttributeString("Version", "wrong4");
+
+
+                for (int i = 0; i < 10; i++)
+                {
+                    writer.WriteStartElement("Cell");
+                    writer.WriteElementString("Name", "wrongFour" + i);
+                    writer.WriteElementString("Content", "=wrongFour"+i+"+wrongFour"+(i+1));
+                    writer.WriteEndElement();
+                    writer.Flush();
+                }
+                writer.WriteStartElement("Cell");
+                writer.WriteElementString("Name", "wrongFour" + 10);
+                writer.WriteElementString("Content", "=wrongFour" + 0);
+                writer.WriteEndElement();
+                writer.Flush();
+
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+
+            }
+            Spreadsheet spreadsheet = new Spreadsheet("wrong4.xml", n => true, n => n, "wrong4");
+        }
 
         /// <summary>
         /// create a xml file
@@ -394,6 +576,77 @@ namespace SS
             spreadsheet.SetContentsOfCell("a4", "stringgggg");
             spreadsheet.Save("TestWrite1.xml");
         }
+
+        /// <summary>
+        /// When it is a xml file but it has formula with wrong variable inside it
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void formulaVariableWrong1()
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "  ";
+
+            using (XmlWriter writer = XmlWriter.Create("wrongVar1.xml", settings))
+            {
+
+
+                writer.WriteStartDocument();
+                writer.WriteStartElement("Spreadsheet");
+
+                writer.WriteAttributeString("Version", "wrongVar1");
+
+
+                for (int i = 0; i < 10; i++)
+                {
+                    writer.WriteStartElement("Cell");
+                    writer.WriteElementString("Name", "wrongVar" + i);
+                    writer.WriteElementString("Content", "=wrongVar_1");
+                    writer.WriteEndElement();
+                    writer.Flush();
+                }
+
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+
+            }
+            Spreadsheet spreadsheet = new Spreadsheet("wrongVar1.xml", n => true, n => n, "wrongVar1");
+        }
+
+        /// <summary>
+        /// When create a formula with wrong variable
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void formulaVariableWrong2()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet();
+            spreadsheet.SetContentsOfCell("a2", "=w1+w_2");
+        }
+
+        /// <summary>
+        /// Is Valid and Normalized worked?
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void formulaVariableWrong3()
+        {
+            Spreadsheet spreadsheet1 = new Spreadsheet(n => true, n => n.ToUpper(), "Upper");
+            Spreadsheet spreadsheet2 = new Spreadsheet();
+            spreadsheet1.SetContentsOfCell("a1", "10");
+            spreadsheet1.SetContentsOfCell("A1", "100");
+            spreadsheet1.SetContentsOfCell("a3", "=a1+A1");
+
+            spreadsheet2.SetContentsOfCell("a1", "10");
+            spreadsheet2.SetContentsOfCell("A1", "100");
+            spreadsheet2.SetContentsOfCell("a3", "=a1+A1");
+
+            Assert.AreEqual(200.0, spreadsheet1.GetCellValue("a3"));
+            Assert.AreEqual(110.0, spreadsheet2.GetCellValue("a3"));
+        }
+
 
         /// <summary>
         /// Test GetVersion
@@ -467,6 +720,27 @@ namespace SS
             string expectedXML = "<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<Spreadsheet Version=\"TheSpecificVersion\">\r\n  <Cell>\r\n    <Name>a1</Name>\r\n    <Content>34</Content>\r\n  </Cell>\r\n  <Cell>\r\n    <Name>a2</Name>\r\n    <Content>=a1+a3</Content>\r\n  </Cell>\r\n  <Cell>\r\n    <Name>a4</Name>\r\n    <Content>stringgggg</Content>\r\n  </Cell>\r\n</Spreadsheet>";
             Assert.AreEqual(expectedXML, spreadsheet.GetXML());
         }
+
+        /// <summary>
+        /// test Get changed
+        /// </summary>
+        [TestMethod]
+        public void testRightSituation()
+        {
+            Spreadsheet spreadsheet1 = new Spreadsheet();
+            Assert.IsFalse(spreadsheet1.Changed);
+            spreadsheet1.Save("testChanged1.xml");
+            Assert.IsFalse(spreadsheet1.Changed);
+            Spreadsheet spreadsheet2 = new Spreadsheet("testChanged1.xml", n=> true, n => n, "default");
+            Assert.IsFalse(spreadsheet2.Changed);
+            spreadsheet1.SetContentsOfCell("a1", "changed, oh yeah!");
+            Assert.IsTrue(spreadsheet1.Changed);
+            spreadsheet1.Save("testChanged1.xml");
+            Spreadsheet spreadsheet3 = new Spreadsheet("testChanged1.xml", n => true, n => n, "default");
+            Assert.IsFalse(spreadsheet3.Changed);
+        }
+
+
 
         //拿个ipad把
         //abstract spreadsheet的所有comment和
