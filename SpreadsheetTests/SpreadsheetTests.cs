@@ -726,7 +726,7 @@ namespace SS
         public void testGetXML()
         {
             Spreadsheet spreadsheet = new Spreadsheet("TestWrite1.xml", n => true, n => n, "TheSpecificVersion");
-            string expectedXML = "<?xml version=\"1.0\" encoding=\"utf-16\"?>\n<spreadsheet version=\"TheSpecificVersion\">\n  <cell>\n    <name>a1</name>\n    <contents>34</contents>\n  </cell>\n  <cell>\n    <name>a2</name>\n    <contents>=a1+a3</contents>\r\n  </cell>\n  <cell>\r\n    <name>a4</name>\n    <contents>stringgggg</contents>\n  </cell>\n</spreadsheet>";
+            string expectedXML = "<?xml version=\"1.0\" encoding=\"utf-16\"?>\n<spreadsheet version=\"TheSpecificVersion\">\n  <cell>\n    <name>a1</name>\n    <contents>34</contents>\n  </cell>\n  <cell>\n    <name>a2</name>\n    <contents>=a1+a3</contents>\n  </cell>\n  <cell>\n    <name>a4</name>\n    <contents>stringgggg</contents>\n  </cell>\n</spreadsheet>";
             Assert.AreEqual(expectedXML, spreadsheet.GetXML());
         }
 
