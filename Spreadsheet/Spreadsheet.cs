@@ -110,7 +110,7 @@ namespace SS
 
                             switch (reader.Name)
                             {
-                                case "Name":
+                                case "name":
                                     reader.Read();
                                     eachNewCellName = reader.Value;
                                     reader.Read();
@@ -214,7 +214,6 @@ namespace SS
         /// </returns>
         protected override IList<string> SetCellContents(string name, double number)
         {
-            name = NormalizeAndCheckName(name);
             Cell cell = new Cell(name, number);
             object oldCellValue = new object();
             if (SpreadsheetCells.ContainsKey(name))
@@ -252,11 +251,6 @@ namespace SS
         /// </returns>
         protected override IList<string> SetCellContents(string name, string text)
         {
-            name = NormalizeAndCheckName(name);
-            if(text == null)
-            {
-                throw new ArgumentNullException("The set text is null!");
-            }
             Cell cell = new Cell(name, text);
             object oldCellValue = new object();
             if (SpreadsheetCells.ContainsKey(name))
@@ -302,60 +296,55 @@ namespace SS
         /// </returns>
         protected override IList<string> SetCellContents(string name, Formula formula)
         {
-            //Check formula and name correction
-            name = NormalizeAndCheckName(name);
-            foreach(string variable in formula.GetVariables())
+            //Check formula variable correction
+            foreach (string variable in formula.GetVariables())
             {
                 NormalizeAndCheckName(variable);
             }
-            if(formula.Equals(null))
+            Cell newCell = new Cell(name, formula);
+
+            if (GetCellContents(name).GetType() != typeof(Formula))
             {
-                throw new ArgumentNullException("You are setting a null formula in the cell - " + name +" !");
-            }
-            Cell cell = new Cell(name, formula);
-
-
-            //Check if it was "" cell
-            bool ifItWasEmptyCell = false;
-            object oldCellValue = GetCellContents(name);
-            if (oldCellValue.GetType() == typeof(string) && (string)oldCellValue == "")
-            {
-                ifItWasEmptyCell = true;
-            }
-            HashSet<string> oldDependees = DependencyGraph.GetDependees(name).ToHashSet();
-
-
-            //create or edit the formula cell
-            Cell oldCell = new Cell(name, oldCellValue);
-
-            if (SpreadsheetCells.ContainsKey(name))
-            {
-                SpreadsheetCells[name] = cell;
+                IEnumerable<string> newDependees = formula.GetVariables();
+                DependencyGraph.ReplaceDependees(name, newDependees);
+                IList<string> cellsToRecalculated;
+                try
+                {
+                    cellsToRecalculated = GetCellsToRecalculate(name).ToList();
+                }
+                catch(CircularException)
+                {
+                    DependencyGraph.ReplaceDependees(name, new List<string>());
+                    throw new CircularException();
+                }
+                if (SpreadsheetCells.ContainsKey(name))
+                {
+                    SpreadsheetCells[name] = newCell;
+                }
+                else
+                {
+                    SpreadsheetCells.Add(name, newCell);
+                }
+                return cellsToRecalculated;
             }
             else
             {
-                SpreadsheetCells.Add(name, cell);
-            }
-            HashSet<string> newDependees = formula.GetVariables().ToHashSet();
-            DependencyGraph.ReplaceDependees(name, newDependees);
-
-            //If the problem Happened
-            try
-            {
-                HashSet<string> changedCells = GetCellsToRecalculate(name).ToHashSet();
-                DeletePreviousDependees(name, oldCellValue);
-                return changedCells.ToList();
-            }
-            catch
-            {
-                SpreadsheetCells[name] = oldCell;
-                DependencyGraph.ReplaceDependees(name, oldDependees);
-                if (ifItWasEmptyCell)
+                IEnumerable<string> newDependees = formula.GetVariables();
+                IEnumerable<string> oldDependees = ((Formula)SpreadsheetCells[name].Value).GetVariables();
+                DependencyGraph.ReplaceDependees(name, newDependees);
+                IList<string> cellsToRecalculated;
+                try
                 {
-                    SpreadsheetCells.Remove(name);
+                    cellsToRecalculated = GetCellsToRecalculate(name).ToList();
                 }
-                throw new CircularException();
-            }
+                catch (CircularException)
+                {
+                    DependencyGraph.ReplaceDependees(name, oldDependees);
+                    throw new CircularException();
+                }
+                SpreadsheetCells[name] = newCell;
+                return cellsToRecalculated;
+            } 
         }
 
 
@@ -374,12 +363,12 @@ namespace SS
         {
             if (SpreadsheetCells.ContainsKey(name))
             {
-                if(oldCellValue.GetType() == typeof(Formula))
+                if (oldCellValue.GetType() == typeof(Formula))
                 {
                     DependencyGraph.ReplaceDependees(name, new List<string>());
                 }
             }
-        }
+        } 
 
         /// <summary>
         /// It will get the direct dependents of a cell.
@@ -437,8 +426,8 @@ namespace SS
                             
                             switch (reader.Name)
                             {
-                                case "Spreadsheet":
-                                    version = reader["Version"];
+                                case "spreadsheet":
+                                    version = reader["version"];
                                     return version;                            }   
                         }
                     }
@@ -464,30 +453,37 @@ namespace SS
             settings.IndentChars = "  ";
             Changed = false;
 
-            using (XmlWriter writer = XmlWriter.Create(filename, settings))
+            try
             {
-
-
-                writer.WriteStartDocument();
-                writer.WriteStartElement("Spreadsheet");
-
-                writer.WriteAttributeString("Version", Version);
-
-
-                foreach (string cellName in GetNamesOfAllNonemptyCells())
+                using (XmlWriter writer = XmlWriter.Create(filename, settings))
                 {
-                    writer.WriteStartElement("Cell");
-                    writer.WriteElementString("Name", cellName);
-                    writer.WriteElementString("Content", SpreadsheetCells[cellName].GetContentString());
+
+
+                    writer.WriteStartDocument();
+                    writer.WriteStartElement("spreadsheet");
+
+                    writer.WriteAttributeString("version", Version);
+
+
+                    foreach (string cellName in GetNamesOfAllNonemptyCells())
+                    {
+                        writer.WriteStartElement("cell");
+                        writer.WriteElementString("name", cellName);
+                        writer.WriteElementString("contents", SpreadsheetCells[cellName].GetContentString());
+                        writer.WriteEndElement();
+                        writer.Flush();
+                    }
+
+
                     writer.WriteEndElement();
-                    writer.Flush();
+                    writer.WriteEndDocument();
+
                 }
-
-
-                writer.WriteEndElement();
-                writer.WriteEndDocument();
-
+            }catch(Exception e)
+            {
+                throw new SpreadsheetReadWriteException(e.Message);
             }
+            
         }
 
 
@@ -507,16 +503,16 @@ namespace SS
                 
 
                 writer.WriteStartDocument();
-                writer.WriteStartElement("Spreadsheet");
+                writer.WriteStartElement("spreadsheet");
 
-                writer.WriteAttributeString("Version", Version);
+                writer.WriteAttributeString("version", Version);
 
 
                 foreach (string cellName in GetNamesOfAllNonemptyCells())
                 {
-                    writer.WriteStartElement("Cell");
-                    writer.WriteElementString("Name", cellName);
-                    writer.WriteElementString("Content", SpreadsheetCells[cellName].GetContentString());
+                    writer.WriteStartElement("cell");
+                    writer.WriteElementString("name", cellName);
+                    writer.WriteElementString("contents", SpreadsheetCells[cellName].GetContentString());
                     writer.WriteEndElement();
                     writer.Flush();
                 }
@@ -599,6 +595,8 @@ namespace SS
         public string Name { get; set; }
         // the value of this cell
         public object Value { get; set; }
+
+
 
         /// <summary>
         /// The constructor to create a cell object with given name and variable

@@ -461,16 +461,16 @@ namespace SS
 
 
                 writer.WriteStartDocument();
-                writer.WriteStartElement("Spreadsheet");
+                writer.WriteStartElement("spreadsheet");
 
-                writer.WriteAttributeString("Version", "wrong2");
+                writer.WriteAttributeString("version", "wrong2");
 
 
                 for (int i = 0; i < 10; i++)
                 {
-                    writer.WriteStartElement("Cell");
-                    writer.WriteElementString("Name", i + " wrong2");
-                    writer.WriteElementString("Content", "wrong2");
+                    writer.WriteStartElement("cell");
+                    writer.WriteElementString("name", i + " wrong2");
+                    writer.WriteElementString("contents", "wrong2");
                     writer.WriteEndElement();
                     writer.Flush();
                 }
@@ -499,16 +499,16 @@ namespace SS
 
 
                 writer.WriteStartDocument();
-                writer.WriteStartElement("Spreadsheet");
+                writer.WriteStartElement("spreadsheet");
 
-                writer.WriteAttributeString("Version", "wrong3");
+                writer.WriteAttributeString("version", "wrong3");
 
 
                 for (int i = 0; i < 10; i++)
                 {
-                    writer.WriteStartElement("Cell");
-                    writer.WriteElementString("Name", "wrongThree"+ i);
-                    writer.WriteElementString("Content", "=q+sksaldkfjals");
+                    writer.WriteStartElement("cell");
+                    writer.WriteElementString("name", "wrongThree"+ i);
+                    writer.WriteElementString("content", "=q+sksaldkfjals");
                     writer.WriteEndElement();
                     writer.Flush();
                 }
@@ -537,22 +537,22 @@ namespace SS
 
 
                 writer.WriteStartDocument();
-                writer.WriteStartElement("Spreadsheet");
+                writer.WriteStartElement("spreadsheet");
 
-                writer.WriteAttributeString("Version", "wrong4");
+                writer.WriteAttributeString("version", "wrong4");
 
 
                 for (int i = 0; i < 10; i++)
                 {
-                    writer.WriteStartElement("Cell");
-                    writer.WriteElementString("Name", "wrongFour" + i);
-                    writer.WriteElementString("Content", "=wrongFour"+i+"+wrongFour"+(i+1));
+                    writer.WriteStartElement("cell");
+                    writer.WriteElementString("name", "wrongFour" + i);
+                    writer.WriteElementString("contents", "=wrongFour"+i+"+wrongFour"+(i+1));
                     writer.WriteEndElement();
                     writer.Flush();
                 }
-                writer.WriteStartElement("Cell");
-                writer.WriteElementString("Name", "wrongFour" + 10);
-                writer.WriteElementString("Content", "=wrongFour" + 0);
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "wrongFour" + 10);
+                writer.WriteElementString("contents", "=wrongFour" + 0);
                 writer.WriteEndElement();
                 writer.Flush();
 
@@ -593,16 +593,16 @@ namespace SS
 
 
                 writer.WriteStartDocument();
-                writer.WriteStartElement("Spreadsheet");
+                writer.WriteStartElement("spreadsheet");
 
-                writer.WriteAttributeString("Version", "wrongVar1");
+                writer.WriteAttributeString("version", "wrongVar1");
 
 
                 for (int i = 0; i < 10; i++)
                 {
-                    writer.WriteStartElement("Cell");
-                    writer.WriteElementString("Name", "wrongVar" + i);
-                    writer.WriteElementString("Content", "=wrongVar_1");
+                    writer.WriteStartElement("cell");
+                    writer.WriteElementString("name", "wrongVar" + i);
+                    writer.WriteElementString("contents", "=wrongVar_1");
                     writer.WriteEndElement();
                     writer.Flush();
                 }
@@ -630,7 +630,6 @@ namespace SS
         /// Is Valid and Normalized worked?
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(InvalidNameException))]
         public void formulaVariableWrong3()
         {
             Spreadsheet spreadsheet1 = new Spreadsheet(n => true, n => n.ToUpper(), "Upper");
@@ -643,7 +642,7 @@ namespace SS
             spreadsheet2.SetContentsOfCell("A1", "100");
             spreadsheet2.SetContentsOfCell("a3", "=a1+A1");
 
-            Assert.AreEqual(200.0, spreadsheet1.GetCellValue("a3"));
+            Assert.AreEqual(200.0, spreadsheet1.GetCellValue("A3"));
             Assert.AreEqual(110.0, spreadsheet2.GetCellValue("a3"));
         }
 
@@ -709,6 +708,16 @@ namespace SS
             Assert.AreEqual("stringgggg", spreadsheet.GetCellContents("a4"));
         }
 
+        /// <summary>
+        /// Test SaveAndThrowAException
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadWriteException))]
+        public void testWriteAndSaveWrong()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet( n => true, n => n, "TheSpecificVersion");
+            spreadsheet.Save("asdfkja;sdfkjas;dfkj\\NoFile.xml");
+        }
 
         /// <summary>
         /// Test GetXML()
@@ -717,7 +726,7 @@ namespace SS
         public void testGetXML()
         {
             Spreadsheet spreadsheet = new Spreadsheet("TestWrite1.xml", n => true, n => n, "TheSpecificVersion");
-            string expectedXML = "<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<Spreadsheet Version=\"TheSpecificVersion\">\r\n  <Cell>\r\n    <Name>a1</Name>\r\n    <Content>34</Content>\r\n  </Cell>\r\n  <Cell>\r\n    <Name>a2</Name>\r\n    <Content>=a1+a3</Content>\r\n  </Cell>\r\n  <Cell>\r\n    <Name>a4</Name>\r\n    <Content>stringgggg</Content>\r\n  </Cell>\r\n</Spreadsheet>";
+            string expectedXML = "<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<spreadsheet version=\"TheSpecificVersion\">\r\n  <cell>\r\n    <name>a1</name>\r\n    <contents>34</contents>\r\n  </cell>\r\n  <cell>\r\n    <name>a2</name>\r\n    <contents>=a1+a3</contents>\r\n  </cell>\r\n  <cell>\r\n    <name>a4</name>\r\n    <contents>stringgggg</contents>\r\n  </cell>\r\n</spreadsheet>";
             Assert.AreEqual(expectedXML, spreadsheet.GetXML());
         }
 
@@ -741,14 +750,18 @@ namespace SS
         }
 
 
+        /// <summary>
+        /// test Set cell a formula to get 100% code coverage
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(CircularException))]
 
-        //拿个ipad把
-        //abstract spreadsheet的所有comment和
-        //canvas Instruction对照，还有
-        //所有piazza和
-        //todo
-
-        //最后再搞comments 和 Readme
+        public void testSetFormulaBadCase()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet();
+            spreadsheet.SetContentsOfCell("a1", "=a2");
+            spreadsheet.SetContentsOfCell("a1", "=a1");
+        }
 
     }
 }
