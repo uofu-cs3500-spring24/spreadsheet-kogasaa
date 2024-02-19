@@ -58,11 +58,6 @@ namespace SS
     {
     }
 
-    //TODO - If the version of the saved spreadsheet does not match the version parameter provided to the constructor
-    //TODO - If any of the names contained in the saved spreadsheet are invalid
-    //TODO - If any invalid formulas or circular dependencies are encountered
-    //TODO - If there are any problems opening, reading, or closing the file
-    // There are no doubt other things that can go wrong
     /// <summary>
     ///   <para>
     ///     Thrown to indicate that a read or write attempt has failed.
@@ -499,7 +494,6 @@ namespace SS
         ///       </para>
         /// </returns>
         public abstract IList<String> SetContentsOfCell(String name, String content);
-        // TODO - test when there is a FormulaFormatException
 
         /// <summary>
         /// True if this spreadsheet has been modified since it was created or saved                  

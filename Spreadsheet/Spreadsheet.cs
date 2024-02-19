@@ -90,7 +90,6 @@ namespace SS
             SpreadsheetCells = new Dictionary<string, Cell>();
             DependencyGraph = new DependencyGraph();
 
-            //TODO - the json reader from a file and create teh spreadsheet cells and dependency graph
             if(VersionString != GetSavedVersion(pathToFile))
             {
                 throw new SpreadsheetReadWriteException("The Version Does not Match");
@@ -157,7 +156,6 @@ namespace SS
         /// or it is null</exception>
         public override object GetCellContents(string name)
         {
-            //TODO figure out if the parameter should be normalized or not
             name = NormalizeAndCheckName(name);
             if (SpreadsheetCells.ContainsKey(name))
             {
@@ -486,10 +484,6 @@ namespace SS
             
         }
 
-
-
-
-        //TODO - Figure out that we can save a XML in a file in method save, but why we still need the XML for get
         public override string GetXML()
         {
             XmlWriterSettings settings = new XmlWriterSettings();
@@ -609,6 +603,10 @@ namespace SS
             Name = name;
         }
 
+        /// <summary>
+        /// This is used for 
+        /// </summary>
+        /// <returns></returns>
         public string GetContentString()
         {
             if(Value.GetType() == typeof(Formula))
