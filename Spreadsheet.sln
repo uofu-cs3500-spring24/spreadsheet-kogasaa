@@ -22,7 +22,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FormulaTests", "FormulaTest
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spreadsheet", "Spreadsheet\Spreadsheet.csproj", "{73825437-7598-4B3D-926D-4599659F50A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetTests", "SpreadsheetTests\SpreadsheetTests.csproj", "{784A76D5-C350-4B84-A746-AF23A2C63073}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpreadsheetTests", "SpreadsheetTests\SpreadsheetTests.csproj", "{784A76D5-C350-4B84-A746-AF23A2C63073}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Whiteboard", "Whiteboard", "{DD212B9D-A5AB-4EFD-9205-06381FF832E9}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\Desktop\architecture.jpg = ..\..\..\..\Desktop\architecture.jpg
+		..\..\..\..\Desktop\dependency_graph_whiteboard.png = ..\..\..\..\Desktop\dependency_graph_whiteboard.png
+		..\..\..\..\Desktop\formula_whiteboard.png = ..\..\..\..\Desktop\formula_whiteboard.png
+		..\..\..\..\Desktop\spreadsheet_whiteboard.png = ..\..\..\..\Desktop\spreadsheet_whiteboard.png
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

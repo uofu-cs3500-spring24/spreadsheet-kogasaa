@@ -1,7 +1,7 @@
 /// <summary>
 /// Author: Bingkun Han
 /// Partner: None
-/// Date: 8th-Feb-2024
+/// Date: 18th-Feb-2024
 /// Course: CS3500 Software Practice, 2024 Spring
 /// Copyright: CS 3500 and Bingkun Han - This work may not
 ///            be copied for use in Academic Coursework.
@@ -15,6 +15,9 @@
 /// This is the test file for testing all the methods in spreadsheet. Including all the 
 /// wrong and right situations for the set cell contents. and all the dependency 
 /// related test to make sure after add many cells the dependency is still correct
+/// 
+/// Also used as regression test. I changed all the setcellcontent to setcontentsofcell
+/// I also test all the saving xml method
 /// </summary>
 
 using SpreadsheetUtilities;

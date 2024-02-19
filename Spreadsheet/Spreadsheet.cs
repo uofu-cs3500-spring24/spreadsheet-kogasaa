@@ -1,7 +1,7 @@
 ﻿/// <summary>
 /// Author: Bingkun Han
 /// Partner: None
-/// Date: 8th-Feb-2024
+/// Date: 18th-Feb-2024
 /// Course: CS3500 Software Practice, 2024 Spring
 /// Copyright: CS 3500 and Bingkun Han - This work may not
 ///            be copied for use in Academic Coursework.
@@ -17,6 +17,12 @@
 /// cell class for future convinent coding. Also helper method for checking
 /// name valid or null. Then I also have helper method to modify the spread-
 /// sheet.
+/// 
+/// Based on the AS4 I also implemnetated the extra features in the AS5:
+/// 1. set cell contents only using by string and string.
+/// 2. save spreadsheet file as xml file
+/// 3. read a xml of a spreadsheet from a file
+/// 4. get value of the cell
 /// </summary>
 
 using SpreadsheetUtilities;
@@ -82,8 +88,15 @@ namespace SS
         }
 
         /// <summary>
-        /// Construct a empty spreadsheet
+        /// To read a file of xml spreadsheet and find the all the cell informatin. All cells' name and contents, then we put them in the spreadsheet
+        /// dictionary. We also pass the given Validor and normalizor. We also compare the version of spreadsheet in file and the spreadsheet version 
+        /// we want to created
         /// </summary>
+        /// <param name="pathToFile">The location to read the file of xml of spreadsheet</param>
+        /// <param name="givenIsValid">defines what valid variables look like for the application </param>
+        /// <param name="givenNormalizor">defines a normalization procedure to be applied to all valid variable strings</param>
+        /// <param name="VersionString">defines the version of the spreadsheet (should it be saved)</param>
+        /// <exception cref="SpreadsheetReadWriteException"></exception>
         public Spreadsheet(string pathToFile, Func<string, bool> givenIsValid, Func<string, string> givenNormalizor, string VersionString):
         base(givenIsValid, givenNormalizor, VersionString)
         {
@@ -138,7 +151,7 @@ namespace SS
         /// <summary>
         /// It will return all the cell with non-empty contents inside it
         /// </summary>
-        /// <returns></returns>
+        /// <returns>hte IEnumrable of all names of all cells' contents are not ""</returns>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
             return SpreadsheetCells.Keys.ToHashSet();
@@ -380,10 +393,74 @@ namespace SS
         }
 
 
-
-
-
-
+        /// <summary>
+        ///   <para>Sets the contents of the named cell to the appropriate value. </para>
+        ///   <para>
+        ///       First, if the content parses as a double, the contents of the named
+        ///       cell becomes that double.
+        ///   </para>
+        ///
+        ///   <para>
+        ///       Otherwise, if content begins with the character '=', an attempt is made
+        ///       to parse the remainder of content into a Formula.  
+        ///       There are then three possible outcomes:
+        ///   </para>
+        ///
+        ///   <list type="number">
+        ///       <item>
+        ///           If the remainder of content cannot be parsed into a Formula, a 
+        ///           SpreadsheetUtilities.FormulaFormatException is thrown.
+        ///       </item>
+        /// 
+        ///       <item>
+        ///           If changing the contents of the named cell to be f
+        ///           would cause a circular dependency, a CircularException is thrown,
+        ///           and no change is made to the spreadsheet.
+        ///       </item>
+        ///
+        ///       <item>
+        ///           Otherwise, the contents of the named cell becomes f.
+        ///       </item>
+        ///   </list>
+        ///
+        ///   <para>
+        ///       Finally, if the content is a string that is not a double and does not
+        ///       begin with an "=" (equal sign), save the content as a string.
+        ///   </para>
+        /// </summary>
+        ///
+        /// <exception cref="InvalidNameException"> 
+        ///   If the name parameter is invalid, throw an InvalidNameException
+        /// </exception>
+        /// 
+        /// <exception cref="SpreadsheetUtilities.FormulaFormatException"> 
+        ///   If the content is "=XYZ" where XYZ is an invalid formula, throw a FormulaFormatException.
+        /// </exception>
+        /// 
+        /// <exception cref="CircularException"> 
+        ///   If changing the contents of the named cell to be the formula would 
+        ///   cause a circular dependency, throw a CircularException.  
+        ///   (NOTE: No change is made to the spreadsheet.)
+        /// </exception>
+        /// 
+        /// <param name="name"> The cell name that is being changed</param>
+        /// <param name="content"> The new content of the cell</param>
+        /// 
+        /// <returns>
+        ///       <para>
+        ///           This method returns a list consisting of the passed in cell name,
+        ///           followed by the names of all other cells whose value depends, directly
+        ///           or indirectly, on the named cell. The order of the list MUST BE any
+        ///           order such that if cells are re-evaluated in that order, their dependencies 
+        ///           are satisfied by the time they are evaluated.
+        ///       </para>
+        ///
+        ///       <para>
+        ///           For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
+        ///           list {A1, B1, C1} is returned.  If the cells are then evaluate din the order:
+        ///           A1, then B1, then C1, the integrity of the Spreadsheet is maintained.
+        ///       </para>
+        /// </returns>
         public override IList<string> SetContentsOfCell(string name, string content)
         {
             name = NormalizeAndCheckName(name);
@@ -408,7 +485,15 @@ namespace SS
 
 
 
-        //Let it just return version
+        /// <summary>
+        /// It will read the xml file with filename in the debug path
+        /// it will use reader each line to find the informatino about the spreadsheet version
+        /// </summary>
+        /// <param name="filename">The path of file to be read</param>
+        /// <returns>string of hte version, if the reader can not find a version it will return ""</returns>
+        /// <exception cref="SpreadsheetReadWriteException">
+        /// the error happened in the reader or find the file, it will throw a read write expectation
+        /// </exception>
         public override string GetSavedVersion(string filename)
         {
             string ?version = null;
@@ -443,7 +528,13 @@ namespace SS
 
 
 
-        //make a total new writer, and put in a file.s
+        /// <summary>
+        /// THis is the method to save xml format of a spreadsheet to a file in the desk with file name
+        /// </summary>
+        /// <param name="filename"> the path location to save file</param>
+        /// <exception cref="SpreadsheetReadWriteException"> throw when there is a problem happened in the writing file
+        /// 1. when the path is not exist
+        /// 2. some other writer errors when writing a xml</exception>
         public override void Save(string filename)
         {
             XmlWriterSettings settings = new XmlWriterSettings();
@@ -484,6 +575,12 @@ namespace SS
             
         }
 
+        /// <summary>
+        /// This is the method to return a XML format of a spreadsheet which contains all the cell information and contents
+        /// </summary>
+        /// <returns>
+        /// XML string form of a spreadsheet
+        /// </returns>
         public override string GetXML()
         {
             XmlWriterSettings settings = new XmlWriterSettings();
