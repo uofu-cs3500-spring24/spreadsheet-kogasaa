@@ -559,13 +559,20 @@ namespace SS
 
 
 
-
+        /// <summary>
+        /// This is the method used for lookup the variable's value and do the calculation of it
+        /// It will keep search the direct dependecies and indirect dependeices values and do the 
+        /// formula calculation
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         private double LookUp(string name)
         {
             string rightFormatName = NormalizeAndCheckName(name);
             if (!SpreadsheetCells.ContainsKey(rightFormatName) || SpreadsheetCells[rightFormatName].Value.GetType() == typeof(string))
             {
-                throw new ArgumentException("You are take a string in the caculator");
+                throw new ArgumentException("You are take a string in the calculator");
             }
             else if (SpreadsheetCells[rightFormatName].Value.GetType() == typeof(double))
             {
@@ -604,9 +611,11 @@ namespace SS
         }
 
         /// <summary>
-        /// This is used for 
+        /// This is used for create a xml file. If it is a formula it will return a string of a string of the formula and add
+        /// a plus sign before the formula string form.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>If it is a formula it will return a add sign and a formula string, if it is string or double, it will
+        /// return the normal string type of string or double.</returns>
         public string GetContentString()
         {
             if(Value.GetType() == typeof(Formula))

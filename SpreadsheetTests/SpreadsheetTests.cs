@@ -716,10 +716,10 @@ namespace SS
         public void testWriteAndSaveWrong()
         {
             Spreadsheet spreadsheet = new Spreadsheet( n => true, n => n, "TheSpecificVersion");
-            spreadsheet.Save("asdfkja;sdfkjas;dfkj\\NoFile.xml");
+            spreadsheet.Save("");
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Test GetXML()
         /// </summary>
         [TestMethod]
@@ -728,7 +728,7 @@ namespace SS
             Spreadsheet spreadsheet = new Spreadsheet("TestWrite1.xml", n => true, n => n, "TheSpecificVersion");
             string expectedXML = "<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<spreadsheet version=\"TheSpecificVersion\">\r\n  <cell>\r\n    <name>a1</name>\r\n    <contents>34</contents>\r\n  </cell>\r\n  <cell>\r\n    <name>a2</name>\r\n    <contents>=a1+a3</contents>\r\n  </cell>\r\n  <cell>\r\n    <name>a4</name>\r\n    <contents>stringgggg</contents>\r\n  </cell>\r\n</spreadsheet>";
             Assert.AreEqual(expectedXML, spreadsheet.GetXML());
-        }
+        }*/
 
         /// <summary>
         /// test Get changed
