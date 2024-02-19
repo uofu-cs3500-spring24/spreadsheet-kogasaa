@@ -763,5 +763,15 @@ namespace SS
             spreadsheet.SetContentsOfCell("a1", "=a1");
         }
 
+        // <summary>
+        /// test Get changed
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestWhenDoesNOtPassInvalidor()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet(n => { if (n == "a1") { return false; } return true;  }, n => n, "ValiderTest");
+            spreadsheet.SetContentsOfCell("a1", "1");
+        }
     }
 }
