@@ -173,7 +173,7 @@ namespace SS
             if (SpreadsheetCells.ContainsKey(name))
             {
                 Cell targetCell = SpreadsheetCells[name];
-                return targetCell.Value;
+                return targetCell.Content;
             }
             else
             {
@@ -229,7 +229,7 @@ namespace SS
             object oldCellValue = new object();
             if (SpreadsheetCells.ContainsKey(name))
             {
-                oldCellValue = SpreadsheetCells[name].Value;
+                oldCellValue = SpreadsheetCells[name].Content;
                 SpreadsheetCells[name] = cell;
             }
             else
@@ -266,7 +266,7 @@ namespace SS
             object oldCellValue = new object();
             if (SpreadsheetCells.ContainsKey(name))
             {
-                oldCellValue = SpreadsheetCells[name].Value;
+                oldCellValue = SpreadsheetCells[name].Content;
                 SpreadsheetCells[name] = cell;
             }
             else
@@ -341,7 +341,7 @@ namespace SS
             else
             {
                 IEnumerable<string> newDependees = formula.GetVariables();
-                IEnumerable<string> oldDependees = ((Formula)SpreadsheetCells[name].Value).GetVariables();
+                IEnumerable<string> oldDependees = ((Formula)SpreadsheetCells[name].Content).GetVariables();
                 DependencyGraph.ReplaceDependees(name, newDependees);
                 IList<string> cellsToRecalculated;
                 try
@@ -635,16 +635,16 @@ namespace SS
         /// </returns>
         public override object GetCellValue(string name)
         {
-            if (SpreadsheetCells.ContainsKey(name) && SpreadsheetCells[name].Value.GetType() == typeof(Formula))
+            if (SpreadsheetCells.ContainsKey(name) && SpreadsheetCells[name].Content.GetType() == typeof(Formula))
             {
-                Formula cellFormula = (Formula)SpreadsheetCells[name].Value;
+                Formula cellFormula = (Formula)SpreadsheetCells[name].Content;
                 return cellFormula.Evaluate(LookUp);
             }
             else
             {
                 try
                 {
-                    return SpreadsheetCells[name].Value;
+                    return SpreadsheetCells[name].Content;
                 }
                 catch(KeyNotFoundException)
                 {
@@ -667,17 +667,17 @@ namespace SS
         private double LookUp(string name)
         {
             string rightFormatName = NormalizeAndCheckName(name);
-            if (!SpreadsheetCells.ContainsKey(rightFormatName) || SpreadsheetCells[rightFormatName].Value.GetType() == typeof(string))
+            if (!SpreadsheetCells.ContainsKey(rightFormatName) || SpreadsheetCells[rightFormatName].Content.GetType() == typeof(string))
             {
                 throw new ArgumentException("You are take a string in the calculator");
             }
-            else if (SpreadsheetCells[rightFormatName].Value.GetType() == typeof(double))
+            else if (SpreadsheetCells[rightFormatName].Content.GetType() == typeof(double))
             {
-                return (Double)SpreadsheetCells[rightFormatName].Value;
+                return (Double)SpreadsheetCells[rightFormatName].Content;
             }
             else
             {
-                Formula cellFormula = (Formula)SpreadsheetCells[name].Value;
+                Formula cellFormula = (Formula)SpreadsheetCells[name].Content;
                 return (double)cellFormula.Evaluate(LookUp);
             }
         }
@@ -692,7 +692,8 @@ namespace SS
         
         public string Name { get; set; }
         // the value of this cell
-        public object Value { get; set; }
+        public object Content { get; set; }
+
 
 
 
@@ -700,10 +701,10 @@ namespace SS
         /// The constructor to create a cell object with given name and variable
         /// </summary>
         /// <param name="name">given name of the cell</param>
-        /// <param name="value">given variabel for the cell, it should be double , string, or formula</param>
-        public Cell(string name, object value)
+        /// <param name="content">given variabel for the cell, it should be double , string, or formula</param>
+        public Cell(string name, object content)
         {
-            Value = value;
+            Content = content;
             Name = name;
         }
 
@@ -715,14 +716,14 @@ namespace SS
         /// return the normal string type of string or double.</returns>
         public string GetContentString()
         {
-            if(Value.GetType() == typeof(Formula))
+            if(Content.GetType() == typeof(Formula))
             {
-                Formula formula = (Formula)Value;
+                Formula formula = (Formula)Content;
                 return "="+ formula.ToString();
             }
             else
             {
-                return Value.ToString();
+                return Content.ToString();
             }
         }
     }
